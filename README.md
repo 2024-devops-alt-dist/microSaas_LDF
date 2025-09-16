@@ -79,7 +79,7 @@ Notre service s’adresse principalement à :
 
 ### 🌐 Backend
 
-- **Node.js** avec **Express**
+- **Node.js** avec **NestJS**
 - **TypeScript**
 
 ### 🗃️ Base de données
