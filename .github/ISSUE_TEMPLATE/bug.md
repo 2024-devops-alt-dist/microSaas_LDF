@@ -1,3 +1,5 @@
+---
+
 ## 🐛 Problem
 
 A clear description of the bug.
@@ -21,3 +23,5 @@ What should happen.
 ## 📸 Screenshots
 
 [If applicable]
+
+---
