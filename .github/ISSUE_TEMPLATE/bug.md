@@ -1,8 +1,16 @@
 ---
+name: '🐛 Bug Report'
+about: Report an error.
+title: '[BUG]'
+labels: 'bug'
+assignees: ''
+---
 
 ## 🐛 Problem
 
 A clear description of the bug.
+
+---
 
 ## Steps to Reproduce
 
@@ -10,9 +18,13 @@ A clear description of the bug.
 2. Step 2
 3. Observed result
 
+---
+
 ## ✅ Expected Behaviour
 
 What should happen.
+
+---
 
 ## 🌍 Environment
 
@@ -20,8 +32,8 @@ What should happen.
 - Navigateur :
 - Version :
 
+---
+
 ## 📸 Screenshots
 
 [If applicable]
-
----
