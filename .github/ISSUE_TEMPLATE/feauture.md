@@ -1,6 +1,6 @@
 ---
-name: '🚀 Feature Request'
-about: Suggest an idea or a new feature for the project.
+name: '🚀 Feature'
+about: Add a new feature.
 title: '[FEAT]'
 labels: 'feature'
 assignees: ''
