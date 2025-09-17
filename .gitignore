@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+# Caché files
+.npm/
+.yarn/
+# Instalation log
+npm-debug.log*
+
+# Backend compilation files (NestJS)
+/dist
+/node_modules
+.env
+.env.local
+.env.production
+.env.development
+.eslintcache
+.vscode/
+/coverage/
+
+# Frontend compilation and caché files (React with Vite)
+/dist
+/build
+.vite/
+.eslintcache
+.vscode/
+
+# Configuration files and environment variables
+.env
+.env.*.local
+
+# System files y editor
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.bak

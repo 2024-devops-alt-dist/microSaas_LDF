@@ -1,0 +1,39 @@
+services:
+  # Backend service (API)
+  backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./api:/app
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=mongodb://mongodb:27017/mi-app
+    depends_on:
+      - mongodb
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - '8080:80'
+    volumes:
+      - ./client:/app
+    depends_on:
+      - backend
+
+  # DB service
+  mongodb:
+    image: mongo:6.0.4
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb-data:/data/db
+
+# Volúmenes para persistir datos
+volumes:
+  mongodb-data:
