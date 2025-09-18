@@ -1,0 +1,21 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+
+# Build and temporary files
+dist/
+build/
+.cache/
+.eslintcache
+/coverage/
+
+# Environment files
+.env
+.env.*
+
+# Git and IDE files
+.git/
+.gitignore
+.DS_Store
+*.swp
+.idea/
