@@ -2,10 +2,10 @@
 node_modules/
 
 # Compilation and build outputs
-/dist
-/build
+dist/
+build/
 .vite/
-/coverage/
+coverage/
 
 # Logs and temporary files
 *.log
