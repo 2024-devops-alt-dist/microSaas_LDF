@@ -1,0 +1,121 @@
+name: CI Checks
+
+on:
+  # Triggers the workflow on push events for the main and dev branches
+  push:
+    branches: [main, dev]
+
+  # Triggers the workflow on pull request events targeting the main and dev branches
+  pull_request:
+    branches: [main, dev]
+
+  # Allows  to run this workflow manually from the Actions tab on GitHub
+  workflow_dispatch:
+
+jobs:
+  backend-checks:
+    name: Backend Checks
+    runs-on: ubuntu-latest
+
+    # Set the default working directory for all run steps in this job to './api'
+    defaults:
+      run:
+        working-directory: ./api
+
+    steps:
+      # Step 1: Check out the repository's code so the workflow can access it
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the specified version of Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0' # Specify the Node.js version your project uses
+          cache: 'npm' # Enable caching for npm dependencies to speed up future runs
+          cache-dependency-path: api/package-lock.json # Specify the lock file for more accurate caching
+
+      # Step 3: Install dependencies using 'npm ci' for a clean, reproducible install
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4 Check formatting
+      - name: Check formatting
+        run: npx prettier --check .
+
+      # Step 5: Run the linter to check for code style issues
+      - name: Run linter
+        run: npm run lint
+
+      # Step 6: Security audit to identify vulnerabilities in dependencies
+      - name: Security audit
+        run: npm audit --audit-level=high
+
+      # Step 6:
+      # - name: Run tests
+      #   run: npm run test
+
+  frontend-checks:
+    name: Frontend Checks
+    runs-on: ubuntu-latest
+
+    # Set the default working directory for all run steps in this job to './client'
+    defaults:
+      run:
+        working-directory: ./client
+
+    steps:
+      # Step 1: Check out the repository's code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4 Check formatting
+      - name: Check formatting
+        run: npx prettier --check .
+
+      # Step 4: Run the linter
+      - name: Run linter
+        run: npm run lint
+
+      # Step 5: Build the application to ensure it compiles without errors
+      - name: Build application
+        run: npm run build
+
+      # Step 6: Security audit
+      - name: Security audit
+        run: npm audit --audit-level=high
+
+      # Step 7: Run tests
+      # - name: Run tests
+      #   run: npm run test
+
+  docker-checks:
+    name: Docker Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lint API Dockerfile
+        # This step uses a linter (hadolint) to check the backend Dockerfile for best practices
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ./api/Dockerfile
+
+      - name: Lint Client Dockerfile
+        # This step checks the frontend Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ./client/Dockerfile
