@@ -4,11 +4,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
+import { UsersModule } from './users/users.module';
+import { CirclesModule } from './circles/circles.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -18,6 +21,8 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
       inject: [ConfigService],
     }),
     HealthcheckModule,
+    UsersModule,
+    CirclesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
