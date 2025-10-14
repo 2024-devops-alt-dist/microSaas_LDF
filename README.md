@@ -24,6 +24,6 @@ Once all services are up and running, you can access the application at the foll
 
 Stop the application: `docker-compose down` (stops and removes containers, but preserves database data).
 
-View the status of services: `docker-compose ps`.
+View the status of services: `docker-compose ps`
 
 View logs: `docker-compose logs -f`.
