@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - dev
-  workflow_dispatch: null
+  workflow_dispatch: {}
 jobs:
   backend-checks:
     name: Backend Checks
