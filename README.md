@@ -26,4 +26,4 @@ Stop the application: `docker-compose down` (stops and removes containers, but p
 
 View the status of services: `docker-compose ps`.
 
-View logs: `docker-compose logs -f`
+View logs: `docker-compose logs -f`.
