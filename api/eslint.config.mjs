@@ -1,4 +1,5 @@
 import eslint from '@eslint/js';
+import * as tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 
