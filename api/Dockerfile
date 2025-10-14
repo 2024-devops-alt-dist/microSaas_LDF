@@ -35,8 +35,10 @@ RUN npm install --only=production
 # Copy the built application from the previous stage
 COPY --from=build /app/dist ./dist
 
+ENV NODE_ENV=production
+
 # Expose port 3000
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "dist/main"]
