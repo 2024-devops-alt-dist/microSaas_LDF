@@ -1,0 +1,48 @@
+{
+  "user_id": "franco_123",
+  "user_name": "Franco",
+  "target_languages": ["German", "English"],
+  "mentorship_status": [
+    {
+      "language": "Spanish",
+      "native": true,
+      "certification": null
+    }
+  ],
+  "my_circles": [
+    {
+      "id": "circle-8",
+      "type": "exchange",
+      "languages": ["Spanish", "English"],
+      "level": "intermediate",
+      "mentors": [
+        {
+          "name": "Franco",
+          "language": "Spanish",
+          "native": true
+        },
+        {
+          "name": "Sarah",
+          "language": "English",
+          "native": true
+        }
+      ],
+      "learners": [
+        { "name": "David", "learning_language": "Spanish" },
+        { "name": "Mia", "learning_language": "Spanish" },
+        { "name": "Franco", "learning_language": "English" }
+      ]
+    },
+    {
+      "id": "circle-9",
+      "type": "practice",
+      "language": "German",
+      "level": "beginner",
+      "members": [
+        { "name": "Peter" },
+        { "name": "Greta" },
+        { "name": "Franco" }
+      ]
+    }
+  ]
+}

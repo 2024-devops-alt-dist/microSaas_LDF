@@ -27,7 +27,7 @@ export default [
         ...globals.browser,
       },
       parserOptions: {
-        project: true,
+        project: ['./tsconfig.app.json', './tsconfig.node.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },

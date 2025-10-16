@@ -1,0 +1,109 @@
+[
+  {
+    "id": "circle-1",
+    "type": "practice",
+    "language": "English",
+    "level": "intermediate",
+    "members": [
+      { "name": "Olivia" },
+      { "name": "Alex" },
+      { "name": "John" },
+      { "name": "Emily" }
+    ]
+  },
+  {
+    "id": "circle-2",
+    "type": "exchange",
+    "languages": ["Spanish", "English"],
+    "level": "intermediate",
+    "mentors": [
+      {
+        "name": "Javier",
+        "language": "Spanish",
+        "native": true
+      },
+      {
+        "name": "Sarah",
+        "language": "English",
+        "native": true
+      }
+    ],
+    "learners": [
+      { "name": "Carlos", "learning_language": "English" },
+      { "name": "Mia", "learning_language": "English" },
+      { "name": "David", "learning_language": "Spanish" }
+    ]
+  },
+  {
+    "id": "circle-3",
+    "type": "practice",
+    "language": "French",
+    "level": "beginner",
+    "members": [
+      { "name": "Juliette" },
+      { "name": "Lucas" },
+      { "name": "Sophie" }
+    ]
+  },
+  {
+    "id": "circle-4",
+    "type": "exchange",
+    "languages": ["German", "Japanese"],
+    "level": "advanced",
+    "mentors": [
+      {
+        "name": "Klaus",
+        "language": "German",
+        "native": true,
+        "certification": "Goethe-Zertifikat C2: GDS"
+      },
+      {
+        "name": "Yuki",
+        "language": "Japanese",
+        "native": true,
+        "certification": "JLPT N1"
+      }
+    ],
+    "learners": [
+      { "name": "Peter", "learning_language": "Japanese" },
+      { "name": "Greta", "learning_language": "Japanese" },
+      { "name": "Kenji", "learning_language": "German" }
+    ]
+  },
+  {
+    "id": "circle-5",
+    "type": "practice",
+    "language": "Italian",
+    "level": "advanced",
+    "members": [
+      { "name": "Marco" },
+      { "name": "Giulia" },
+      { "name": "Paolo" },
+      { "name": "Francesca" },
+      { "name": "Lorenzo" }
+    ]
+  },
+  {
+    "id": "circle-6",
+    "type": "exchange",
+    "languages": ["French", "Portuguese"],
+    "level": "beginner",
+    "mentors": [
+      {
+        "name": "Amélie",
+        "language": "French",
+        "native": true
+      },
+      {
+        "name": "João",
+        "language": "Portuguese",
+        "native": true
+      }
+    ],
+    "learners": [
+      { "name": "Liam", "learning_language": "French" },
+      { "name": "Sofia", "learning_language": "French" },
+      { "name": "Antoine", "learning_language": "Portuguese" }
+    ]
+  }
+]
