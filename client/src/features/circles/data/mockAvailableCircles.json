@@ -5,10 +5,26 @@
     "language": "English",
     "level": "intermediate",
     "members": [
-      { "name": "Olivia" },
-      { "name": "Alex" },
-      { "name": "John" },
-      { "name": "Emily" }
+      {
+        "name": "Olivia",
+        "target_languages": ["English"],
+        "isMentor": false
+      },
+      {
+        "name": "Alex",
+        "target_languages": ["English"],
+        "isMentor": false
+      },
+      {
+        "name": "John",
+        "target_languages": ["English"],
+        "isMentor": false
+      },
+      {
+        "name": "Emily",
+        "target_languages": ["English"],
+        "isMentor": false
+      }
     ]
   },
   {
@@ -19,19 +35,38 @@
     "mentors": [
       {
         "name": "Javier",
-        "language": "Spanish",
-        "native": true
+        "mastered_languages": ["Spanish"],
+        "native": true,
+        "target_languages": ["English"],
+        "isMentor": true
       },
       {
         "name": "Sarah",
-        "language": "English",
-        "native": true
+        "mastered_languages": ["English"],
+        "native": true,
+        "target_languages": ["Spanish"],
+        "isMentor": true
       }
     ],
     "learners": [
-      { "name": "Carlos", "learning_language": "English" },
-      { "name": "Mia", "learning_language": "English" },
-      { "name": "David", "learning_language": "Spanish" }
+      {
+        "name": "Carlos",
+        "learning_language": "English",
+        "target_languages": ["English"],
+        "isMentor": false
+      },
+      {
+        "name": "Mia",
+        "learning_language": "English",
+        "target_languages": ["English"],
+        "isMentor": false
+      },
+      {
+        "name": "David",
+        "learning_language": "Spanish",
+        "target_languages": ["Spanish"],
+        "isMentor": false
+      }
     ]
   },
   {
@@ -40,9 +75,21 @@
     "language": "French",
     "level": "beginner",
     "members": [
-      { "name": "Juliette" },
-      { "name": "Lucas" },
-      { "name": "Sophie" }
+      {
+        "name": "Juliette",
+        "target_languages": ["French"],
+        "isMentor": false
+      },
+      {
+        "name": "Lucas",
+        "target_languages": ["French"],
+        "isMentor": false
+      },
+      {
+        "name": "Sophie",
+        "target_languages": ["French"],
+        "isMentor": false
+      }
     ]
   },
   {
@@ -53,21 +100,40 @@
     "mentors": [
       {
         "name": "Klaus",
-        "language": "German",
+        "mastered_languages": ["German"],
         "native": true,
-        "certification": "Goethe-Zertifikat C2: GDS"
+        "certification": "Goethe-Zertifikat C2: GDS",
+        "target_languages": ["Japanese"],
+        "isMentor": true
       },
       {
         "name": "Yuki",
-        "language": "Japanese",
+        "mastered_languages": ["Japanese"],
         "native": true,
-        "certification": "JLPT N1"
+        "certification": "JLPT N1",
+        "target_languages": ["German"],
+        "isMentor": true
       }
     ],
     "learners": [
-      { "name": "Peter", "learning_language": "Japanese" },
-      { "name": "Greta", "learning_language": "Japanese" },
-      { "name": "Kenji", "learning_language": "German" }
+      {
+        "name": "Peter",
+        "learning_language": "Japanese",
+        "target_languages": ["Japanese"],
+        "isMentor": false
+      },
+      {
+        "name": "Greta",
+        "learning_language": "Japanese",
+        "target_languages": ["Japanese"],
+        "isMentor": false
+      },
+      {
+        "name": "Kenji",
+        "learning_language": "German",
+        "target_languages": ["German"],
+        "isMentor": false
+      }
     ]
   },
   {
@@ -76,11 +142,31 @@
     "language": "Italian",
     "level": "advanced",
     "members": [
-      { "name": "Marco" },
-      { "name": "Giulia" },
-      { "name": "Paolo" },
-      { "name": "Francesca" },
-      { "name": "Lorenzo" }
+      {
+        "name": "Marco",
+        "target_languages": ["Italian"],
+        "isMentor": false
+      },
+      {
+        "name": "Giulia",
+        "target_languages": ["Italian"],
+        "isMentor": false
+      },
+      {
+        "name": "Paolo",
+        "target_languages": ["Italian"],
+        "isMentor": false
+      },
+      {
+        "name": "Francesca",
+        "target_languages": ["Italian"],
+        "isMentor": false
+      },
+      {
+        "name": "Lorenzo",
+        "target_languages": ["Italian"],
+        "isMentor": false
+      }
     ]
   },
   {
@@ -91,19 +177,38 @@
     "mentors": [
       {
         "name": "Amélie",
-        "language": "French",
-        "native": true
+        "mastered_languages": ["French"],
+        "native": true,
+        "target_languages": ["Portuguese"],
+        "isMentor": true
       },
       {
         "name": "João",
-        "language": "Portuguese",
-        "native": true
+        "mastered_languages": ["Portuguese"],
+        "native": true,
+        "target_languages": ["French"],
+        "isMentor": true
       }
     ],
     "learners": [
-      { "name": "Liam", "learning_language": "French" },
-      { "name": "Sofia", "learning_language": "French" },
-      { "name": "Antoine", "learning_language": "Portuguese" }
+      {
+        "name": "Liam",
+        "learning_language": "French",
+        "target_languages": ["French"],
+        "isMentor": false
+      },
+      {
+        "name": "Sofia",
+        "learning_language": "French",
+        "target_languages": ["French"],
+        "isMentor": false
+      },
+      {
+        "name": "Antoine",
+        "learning_language": "Portuguese",
+        "target_languages": ["Portuguese"],
+        "isMentor": false
+      }
     ]
   }
 ]

@@ -2,6 +2,7 @@ export interface Member {
   name: string;
   target_languages: string[];
   isMentor: boolean;
+  avatarUrl?: string;
 }
 
 export interface Mentor extends Member {

@@ -4,19 +4,27 @@ import myCirclesData from '../data/mockMyCircles.json';
 import availableCirclesData from '../data/mockAvailableCircles.json';
 
 const USE_MOCK = true;
+const SIMULATED_DELAY_MS = 500;
 
 export class MockCircleService implements ICircleService {
   async getMyCircles(): Promise<Circle[]> {
-    return USE_MOCK ? myCirclesData : [];
+    await delay(SIMULATED_DELAY_MS);
+
+    const data = myCirclesData as { my_circles: Circle[] }[];
+
+    return USE_MOCK ? data[0].my_circles : [];
   }
 
   async getAvailableCircles(): Promise<Circle[]> {
-    return USE_MOCK ? availableCirclesData : [];
+    await delay(SIMULATED_DELAY_MS);
+    const data = availableCirclesData as Circle[];
+    return USE_MOCK ? data : [];
   }
   async requestToJoinCircle(circleId: string): Promise<Circle> {
-    // Aquí iría la lógica para solicitar unirse a un círculo
-    // Por ahora, simplemente devolvemos un círculo simulado
-    const circle = availableCirclesData.find((c) => c.id === circleId);
+    await delay(SIMULATED_DELAY_MS);
+    const circle = availableCirclesData.find(
+      (c) => c.id === circleId,
+    ) as Circle;
     if (!circle) {
       throw new Error('Circle not found');
     }
@@ -26,6 +34,9 @@ export class MockCircleService implements ICircleService {
   async leaveCircle(circleId: string): Promise<{ success: boolean }> {
     // Aquí iría la lógica para salir de un círculo
     // Por ahora, simplemente devolvemos éxito simulado
+    await delay(SIMULATED_DELAY_MS);
     return { success: true };
   }
 }
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
