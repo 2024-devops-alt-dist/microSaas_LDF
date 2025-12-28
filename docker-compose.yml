@@ -4,12 +4,15 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
+      target: development
+    command: npm run start:dev
     ports:
       - "3000:3000"
     volumes:
       - ./api:/app
+      - /app/node_modules
     env_file:
-      - ./.env
+      - ./api/.env
     depends_on:
       - mongodb
 
@@ -18,10 +21,15 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      target: development
+    command: npm run dev -- --host
     ports:
-      - "8080:80"
+      - "5173:5173"
     volumes:
       - ./client:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3000
     depends_on:
       - backend
 

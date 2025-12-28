@@ -31,7 +31,7 @@ export class MockCircleService implements ICircleService {
     return circle;
   }
 
-  async leaveCircle(circleId: string): Promise<{ success: boolean }> {
+  async leaveCircle(_circleId: string): Promise<{ success: boolean }> {
     // Aquí iría la lógica para salir de un círculo
     // Por ahora, simplemente devolvemos éxito simulado
     await delay(SIMULATED_DELAY_MS);
