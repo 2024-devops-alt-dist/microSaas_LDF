@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
+import { CirclesModule } from './circles/circles.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
       inject: [ConfigService],
     }),
     HealthcheckModule,
+    CirclesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
