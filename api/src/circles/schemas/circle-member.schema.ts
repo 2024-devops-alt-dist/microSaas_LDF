@@ -1,30 +1,31 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 
-Schema({ _id: false })
+@Schema({ _id: false })
 export class CircleMember {
-    @Prop({ required: true })
-    userId: string;
+  @Prop({ type: Types.ObjectId, ref: 'user', required: true })
+  userId: Types.ObjectId;
 
-    @Prop({ required: true })
-    name: string;
+  @Prop({ required: true })
+  name: string;
 
-    @Prop([String])
-    targetLanguages?: string[];
+  @Prop()
+  learningLanguage?: string;
 
-    @Prop({default: false})
-    isMentor: boolean;
+  @Prop([String])
+  targetLanguages?: string[];
 
-    @Prop([String])
-    mastered_languages?: string[];
+  @Prop({ default: false })
+  isMentor: boolean;
 
-    @Prop()
-    native?: boolean;
+  @Prop([String])
+  masteredLanguages?: string[];
 
-    @Prop()
-    certification?: string;
+  @Prop()
+  native?: boolean;
 
-    @Prop()
-    learning_language?: string;
+  @Prop()
+  certification?: string;
 }
 
 export const CircleMemberSchema = SchemaFactory.createForClass(CircleMember);

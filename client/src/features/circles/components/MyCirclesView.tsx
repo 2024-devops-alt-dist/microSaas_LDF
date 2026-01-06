@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { MainLayout } from '../../../components/MainLayout';
 import { CircleCard } from './CircleCard';
-import { MockCircleService } from '../services/circleService';
+import { CircleService } from '../services/circleService';
 import type { Circle } from '../types';
 
-const circleService = new MockCircleService();
+const circleService = new CircleService();
 
 const MyCirclesView: React.FC = () => {
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -35,7 +35,7 @@ const MyCirclesView: React.FC = () => {
       ) : circles.length > 0 ? (
         <div className="flex flex-col !gap-y-[40px] pb-10">
           {circles.map((circle) => (
-            <CircleCard key={circle.id} circle={circle} />
+            <CircleCard key={circle._id} circle={circle} />
           ))}
         </div>
       ) : (

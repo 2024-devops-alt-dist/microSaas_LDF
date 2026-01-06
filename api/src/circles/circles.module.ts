@@ -7,8 +7,8 @@ import { Circle, CircleSchema } from './schemas/circle.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Circle.name, schema: CircleSchema }]),
-    ],
-    controllers: [CirclesController],
-    providers: [CirclesService],
+  ],
+  controllers: [CirclesController],
+  providers: [CirclesService],
 })
 export class CirclesModule {}
