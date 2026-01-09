@@ -4,37 +4,25 @@ import { CircleMember, CircleMemberSchema } from './circle-member.schema';
 
 export type CircleDocument = HydratedDocument<Circle>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Circle {
-  @Prop()
-  name?: string;
-
   @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true, enum: ['PRACTICE', 'EXCHANGE'] })
   type: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, enum: ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'] })
   level: string;
 
-  // Case 1: PRACTICE
-  @Prop()
-  language?: string;
+  @Prop({ type: [String], required: true })
+  languages: string[];
+
+  @Prop({ default: true })
+  requiresMentor: boolean;
 
   @Prop({ type: [CircleMemberSchema], default: [] })
-  members?: CircleMember[];
-
-  // Case 2: EXCHANGE
-  @Prop([String])
-  languages?: string[];
-
-  @Prop({ type: [CircleMemberSchema], default: [] })
-  mentors?: CircleMember[];
-
-  @Prop({ type: [CircleMemberSchema], default: [] })
-  learners?: CircleMember[];
-
-  // Waiting list
-  @Prop({ type: [CircleMemberSchema], default: [] })
-  requests?: CircleMember[];
+  members: CircleMember[];
 }
 
 export const CircleSchema = SchemaFactory.createForClass(Circle);

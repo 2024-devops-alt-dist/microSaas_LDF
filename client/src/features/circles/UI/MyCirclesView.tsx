@@ -1,45 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { MainLayout } from '../../../components/MainLayout';
+import { MainLayout } from '../../../shared/UI/MainLayout';
 import { CircleCard } from './CircleCard';
-import type { Circle } from '../types';
 import { CircleService } from '../services/circleService';
+import type { Circle } from '../types';
 
 const circleService = new CircleService();
 
-const AvailableCirclesView: React.FC = () => {
+const MyCirclesView: React.FC = () => {
   const [circles, setCircles] = useState<Circle[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [joiningId, setJoiningId] = useState<string | null>(null);
-
   useEffect(() => {
-    const fetchAvailableCircles = async () => {
+    const fetchCircles = async () => {
       try {
         setLoading(true);
-        const data = await circleService.getAvailableCircles();
+        const data = await circleService.getMyCircles();
         setCircles(data);
       } catch (error) {
-        console.error('Error fetching available circles', error);
+        console.error('Error fetching circles', error);
       } finally {
         setLoading(false);
       }
     };
-    void fetchAvailableCircles();
+    void fetchCircles();
   }, []);
-
-  const handleJoinRequest = async (circleId: string) => {
-    try {
-      setJoiningId(circleId);
-      await circleService.requestToJoinCircle(circleId);
-
-      alert('Request sent successfully! 🎉');
-    } catch (error) {
-      console.error('Error joining circle', error);
-      alert('Failed to join circle. Try again.');
-    } finally {
-      setJoiningId(null);
-    }
-  };
 
   return (
     <MainLayout>
@@ -51,21 +35,19 @@ const AvailableCirclesView: React.FC = () => {
       ) : circles.length > 0 ? (
         <div className="flex flex-col !gap-y-[40px] pb-10">
           {circles.map((circle) => (
-            <CircleCard
-              key={circle._id}
-              circle={circle}
-              onRequestJoin={handleJoinRequest}
-              isJoining={joiningId === circle._id}
-            />
+            <CircleCard key={circle._id} circle={circle} />
           ))}
         </div>
       ) : (
+        // Empty State
         <div className="h-full flex flex-col justify-center pb-10">
           <div className="card bg-base-200/90 backdrop-blur-sm shadow-xl border border-white/50 p-8 items-center text-center">
             <h2 className="text-primary text-xl font-normal font-title mb-8">
-              No new circles available right now.
+              Oops... it looks like you haven’t joined a circle yet!
             </h2>
-            <p className="text-neutral/70">Check back later!</p>
+            <button className="btn btn-primary w-full text-white rounded-xl shadow-lg">
+              Join a circle
+            </button>
           </div>
         </div>
       )}
@@ -73,4 +55,4 @@ const AvailableCirclesView: React.FC = () => {
   );
 };
 
-export default AvailableCirclesView;
+export default MyCirclesView;

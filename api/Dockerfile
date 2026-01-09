@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 #### STAGE 2: Build ####
-FROM development as builder
+FROM development AS builder
 
 # Build the application
 RUN npm run build

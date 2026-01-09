@@ -5,6 +5,11 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
 import { CirclesModule } from './circles/circles.module';
+import { UsersModule } from './users/users.module';
+import { EventsModule } from './events/events.module';
+import { MessagesModule } from './messages/messages.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { RequestsModule } from './requests/requests.module';
 
 @Module({
   imports: [
@@ -20,6 +25,11 @@ import { CirclesModule } from './circles/circles.module';
     }),
     HealthcheckModule,
     CirclesModule,
+    UsersModule,
+    EventsModule,
+    MessagesModule,
+    NotificationsModule,
+    RequestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

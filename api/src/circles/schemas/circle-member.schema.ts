@@ -3,29 +3,21 @@ import { Types } from 'mongoose';
 
 @Schema({ _id: false })
 export class CircleMember {
-  @Prop({ type: Types.ObjectId, ref: 'user', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
   @Prop({ required: true })
   name: string;
 
-  @Prop()
-  learningLanguage?: string;
+  @Prop({
+    type: String,
+    enum: ['MENTOR', 'LEARNER', 'ADMIN'],
+    required: true,
+  })
+  role: string;
 
-  @Prop([String])
-  targetLanguages?: string[];
-
-  @Prop({ default: false })
-  isMentor: boolean;
-
-  @Prop([String])
-  masteredLanguages?: string[];
-
-  @Prop()
-  native?: boolean;
-
-  @Prop()
-  certification?: string;
+  @Prop({ default: Date.now })
+  joinedAt: Date;
 }
 
 export const CircleMemberSchema = SchemaFactory.createForClass(CircleMember);
