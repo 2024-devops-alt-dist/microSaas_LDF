@@ -1,0 +1,81 @@
+[
+  {
+    "user_id": "franco_123",
+    "user_name": "Franco",
+    "target_languages": ["German", "English"],
+    "mentorship_status": [
+      {
+        "language": "Spanish",
+        "native": true,
+        "certification": null
+      }
+    ],
+    "my_circles": [
+      {
+        "id": "circle-8",
+        "type": "exchange",
+        "languages": ["Spanish", "English"],
+        "level": "intermediate",
+        "mentors": [
+          {
+            "name": "Franco",
+            "target_languages": ["English"],
+            "isMentor": true,
+            "mastered_languages": ["Spanish"],
+            "native": true
+          },
+          {
+            "name": "Sarah",
+            "target_languages": ["Spanish"],
+            "isMentor": true,
+            "mastered_languages": ["English"],
+            "native": true
+          }
+        ],
+        "learners": [
+          {
+            "name": "David",
+            "target_languages": ["Spanish"],
+            "isMentor": false,
+            "learning_language": "Spanish"
+          },
+          {
+            "name": "Mia",
+            "target_languages": ["Spanish"],
+            "isMentor": false,
+            "learning_language": "Spanish"
+          },
+          {
+            "name": "Franco",
+            "target_languages": ["English"],
+            "isMentor": false,
+            "learning_language": "English"
+          }
+        ]
+      },
+      {
+        "id": "circle-9",
+        "type": "practice",
+        "language": "German",
+        "level": "beginner",
+        "members": [
+          {
+            "name": "Peter",
+            "target_languages": ["German"],
+            "isMentor": false
+          },
+          {
+            "name": "Greta",
+            "target_languages": ["German"],
+            "isMentor": false
+          },
+          {
+            "name": "Franco",
+            "target_languages": ["German", "English"],
+            "isMentor": false
+          }
+        ]
+      }
+    ]
+  }
+]

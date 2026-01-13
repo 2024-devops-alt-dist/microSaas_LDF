@@ -1,0 +1,39 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: backend-format-lint
+      # It runs only on the files that are being committed on the API repo
+      root: 'api/'
+      glob: '*.{js,ts}'
+      run: |
+        npx prettier --write {staged_files}
+        npx eslint --fix {staged_files}
+        git add {staged_files}
+
+    - name: frontend-format-lint
+      # It runs only on the files that are being committed on the CLIENT repo
+      root: 'client/'
+      glob: '*.{js,ts,jsx,tsx}'
+      run: |
+        npx prettier --write {staged_files}
+        npx eslint --fix {staged_files}
+        git add {staged_files}
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: backend-check
+      root: 'api/'
+      run: |
+        echo "Running backend checks before push..."
+        npm run lint
+        npm run test
+        npm audit --audit-level=high
+
+    - name: frontend-check
+      root: 'client/'
+      run: |
+        echo "Running frontend checks before push..."
+        npm run lint
+        npm run build
+        npm audit --audit-level=high

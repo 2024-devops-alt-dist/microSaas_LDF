@@ -1,0 +1,37 @@
+import eslint from '@eslint/js';
+import * as tseslint from 'typescript-eslint';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import globals from 'globals';
+
+export default [
+  {
+    ignores: ['dist/', 'node_modules/', 'eslint.config.mjs'],
+  },
+
+  eslint.configs.recommended,
+
+  ...tseslint.configs.recommendedTypeChecked,
+
+  {
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...globals.jest,
+      },
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+    },
+  },
+
+  eslintPluginPrettierRecommended,
+];
