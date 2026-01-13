@@ -1,29 +1,29 @@
 import React from 'react';
-import type { Circle, Member } from '../types';
+import type { Circle, UserProfile } from '../types';
 
-const getAvatar = (member: Member & { avatarUrl?: string }) => {
-  if (member.avatarUrl) return member.avatarUrl;
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&color=fff&rounded=true&bold=true`;
+const getAvatar = (user: UserProfile) => {
+  if (user.avatarUrl) return user.avatarUrl;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff&rounded=true&bold=true`;
 };
 
-const AvatarItem = ({ member }: { member: Member }) => (
+const AvatarItem = ({ user }: { user: UserProfile }) => (
   <div className="flex flex-col items-center w-[50px]">
     <div className="w-10 h-10 rounded-full border-2 border-white shadow-sm flex items-center justify-center overflow-hidden bg-gray-200">
       <img
-        src={getAvatar(member)}
-        alt={member.name}
+        src={getAvatar(user)}
+        alt={user.name}
         className="w-full h-full object-cover"
       />
     </div>
     <span className="text-[10px] text-[#006D77] font-sans font-medium mt-1 text-center truncate w-full px-1">
-      {member.name.split(' ')[0]}
+      {user.name.split(' ')[0]}
     </span>
   </div>
 );
 
 interface CircleCardProps {
   circle: Circle;
-  onRequestJoin?: (circleId: string) => void;
+  onRequestJoin?: (circleId: string) => void | Promise<void>;
   isJoining?: boolean;
 }
 
@@ -32,8 +32,16 @@ export const CircleCard: React.FC<CircleCardProps> = ({
   onRequestJoin,
   isJoining = false,
 }) => {
-  const isPractice = circle.type === 'practice';
+  const isPractice = circle.type?.toUpperCase() === 'PRACTICE';
   const title = isPractice ? 'Practice Circle' : 'Exchange Circle';
+
+  const mentors = !isPractice
+    ? circle.members.filter((m) => m.role === 'mentor')
+    : [];
+
+  const learners = !isPractice
+    ? circle.members.filter((m) => m.role === 'member')
+    : [];
 
   return (
     <div className="card bg-[#EDF6F9] shadow-[0_4px_12px_rgba(0,109,119,0.1)] border border-[#006D77]/30 w-full rounded-2xl overflow-hidden">
@@ -72,32 +80,36 @@ export const CircleCard: React.FC<CircleCardProps> = ({
         <div className="mt-1 mb-2">
           {circle.type === 'practice' ? (
             <div className="flex flex-wrap gap-x-2 gap-y-3">
-              {circle.members.map((m, i) => (
-                <AvatarItem key={i} member={m} />
+              {circle.members.map((m) => (
+                <AvatarItem key={m.user._id} user={m.user} />
               ))}
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="flex items-start gap-x-2">
-                <span className="text-[#006D77] italic font-serif font-light text-sm w-16 pt-2 shrink-0">
-                  Mentors:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {circle.mentors.map((m, i) => (
-                    <AvatarItem key={i} member={m} />
-                  ))}
+              {mentors.length > 0 && (
+                <div className="flex items-start gap-x-2">
+                  <span className="text-[#006D77] italic font-serif font-light text-sm w-16 pt-2 shrink-0">
+                    Mentors:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {mentors.map((m) => (
+                      <AvatarItem key={m.user._id} user={m.user} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-x-2">
-                <span className="text-[#006D77] italic font-serif font-light text-sm w-16 pt-2 shrink-0">
-                  Learners:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {circle.learners.map((l, i) => (
-                    <AvatarItem key={i} member={l} />
-                  ))}
+              )}
+              {learners.length > 0 && (
+                <div className="flex items-start gap-x-2">
+                  <span className="text-[#006D77] italic font-serif font-light text-sm w-16 pt-2 shrink-0">
+                    Learners:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {learners.map((l) => (
+                      <AvatarItem key={l.user._id} user={l.user} />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
@@ -105,7 +117,7 @@ export const CircleCard: React.FC<CircleCardProps> = ({
         {onRequestJoin && (
           <div className="mt-4 pt-4 border-t border-[#006D77]/10">
             <button
-              onClick={() => onRequestJoin(circle.id)}
+              onClick={() => void onRequestJoin(circle._id)}
               disabled={isJoining}
               style={{
                 backgroundColor: '#006D77',

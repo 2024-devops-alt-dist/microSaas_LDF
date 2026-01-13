@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { MainLayout } from '../../../components/MainLayout';
+import { MainLayout } from '../../../shared/UI/MainLayout';
 import { CircleCard } from './CircleCard';
-import { MockCircleService } from '../services/circleService';
 import type { Circle } from '../types';
+import { CircleService } from '../services/circleService';
 
-const circleService = new MockCircleService();
+const circleService = new CircleService();
 
 const AvailableCirclesView: React.FC = () => {
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -52,10 +52,10 @@ const AvailableCirclesView: React.FC = () => {
         <div className="flex flex-col !gap-y-[40px] pb-10">
           {circles.map((circle) => (
             <CircleCard
-              key={circle.id}
+              key={circle._id}
               circle={circle}
               onRequestJoin={handleJoinRequest}
-              isJoining={joiningId === circle.id}
+              isJoining={joiningId === circle._id}
             />
           ))}
         </div>

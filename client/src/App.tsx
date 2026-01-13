@@ -1,8 +1,8 @@
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import MyCirclesView from './features/circles/components/MyCirclesView';
+import MyCirclesView from './features/circles/UI/MyCirclesView';
 import ApiHealth from './pages/ApiHealth';
-import AvailableCirclesView from './features/circles/components/AvailableCirclesView';
+import AvailableCirclesView from './features/circles/UI/AvailableCirclesView';
 
 function App() {
   return (

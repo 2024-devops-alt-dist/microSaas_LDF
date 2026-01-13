@@ -1,36 +1,33 @@
-export interface Member {
+export interface UserProfile {
+  _id: string;
   name: string;
-  target_languages: string[];
-  isMentor: boolean;
+  email?: string;
+  learningLanguage: string;
+  targetLanguages: string[];
   avatarUrl?: string;
-}
-
-export interface Mentor extends Member {
-  mastered_languages: string[];
-  native: boolean;
   certification?: string;
 }
 
-export interface Learner extends Member {
-  learning_language: string;
+export interface CircleMember {
+  user: UserProfile;
+  role: 'admin' | 'moderator' | 'member' | 'mentor';
+  joinedAt?: Date;
 }
-
 interface BaseCircle {
-  id: string;
+  _id: string;
+  name: string;
   level: 'beginner' | 'intermediate' | 'advanced';
+  members: CircleMember[];
 }
 
 export interface PracticeCircle extends BaseCircle {
   type: 'practice';
   language: string;
-  members: Member[];
 }
 
 export interface ExchangeCircle extends BaseCircle {
   type: 'exchange';
   languages: [string, string];
-  mentors: [Mentor, Mentor];
-  learners: Learner[];
 }
 
 export type Circle = PracticeCircle | ExchangeCircle;
@@ -40,4 +37,7 @@ export interface ICircleService {
   getAvailableCircles(): Promise<Circle[]>;
   requestToJoinCircle(circleId: string): Promise<Circle>;
   leaveCircle(circleId: string): Promise<{ success: boolean }>;
+  getCirclesByType(type: string): Promise<Circle[]>;
+  getCircleById(id: string): Promise<Circle>;
+  approveRequest(circleId: string, userId: string): Promise<Circle>;
 }
