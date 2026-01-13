@@ -10,11 +10,12 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { CirclesService } from './circles.service';
-import { CircleMember } from './schemas/circle-member.schema';
 
 @Controller('circles')
 export class CirclesController {
   constructor(private readonly circlesService: CirclesService) {}
+
+  // --- QUERIES ---
 
   @Get('mycircles')
   findMyCircles(@Query('userId') userId: string) {
@@ -39,6 +40,8 @@ export class CirclesController {
     return this.circlesService.findOne(id);
   }
 
+  // --- BASIC CRUD ---
+
   @Post()
   create(@Body() createCircleDto: any) {
     return this.circlesService.create(createCircleDto);
@@ -54,23 +57,13 @@ export class CirclesController {
     return this.circlesService.remove(id);
   }
 
-  // Additional endpoints for user actions can be added here
-  @Post(':id/join')
-  requestJoinCircle(
-    @Param('id') id: string,
-    @Body('member') memberData: CircleMember,
-  ) {
-    return this.circlesService.requestJoinCircle(id, memberData);
-  }
+  // --- USER ACCTIONS ---
 
   @Post(':id/leave')
   leaveCircle(@Param('id') id: string, @Body('userId') userId: string) {
+    if (!userId) {
+      throw new BadRequestException('userId is required');
+    }
     return this.circlesService.leaveCircle(id, userId);
-  }
-
-  // Additional endpoints for approving/rejecting requests can be added here
-  @Post(':id/approve')
-  approveRequest(@Param('id') id: string, @Body('userId') userId: string) {
-    return this.circlesService.approveRequest(id, userId);
   }
 }

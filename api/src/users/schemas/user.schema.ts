@@ -35,16 +35,16 @@ export class User {
   email: string;
 
   @Prop()
-  password?: string;
+  password: string;
 
   @Prop()
   avatar?: string;
 
   @Prop()
-  birthDate?: Date;
+  birthDate: Date;
 
   @Prop()
-  timeZone?: string;
+  timeZone: string;
 
   @Prop([String])
   nativeLanguages: string[];

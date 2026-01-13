@@ -1,19 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Circle } from './schemas/circle.schema';
 import { CircleMember } from './schemas/circle-member.schema';
 
-interface JoinRequestDto {
-  userId: Types.ObjectId;
-  name: string;
-  [key: string]: any;
-}
 @Injectable()
 export class CirclesService {
   constructor(@InjectModel(Circle.name) private circleModel: Model<Circle>) {}
 
-  // Creation and deletion methods
+  // 1. CORE CRUD
   async create(creatCircleDto: any): Promise<Circle> {
     const createdCircle = new this.circleModel(creatCircleDto);
     return createdCircle.save();
@@ -39,23 +35,8 @@ export class CirclesService {
     return updatedCircle;
   }
 
-  // Retrieval methods
   async findAll(): Promise<Circle[]> {
     return this.circleModel.find().exec();
-  }
-
-  async findMyCircles(userId: string): Promise<Circle[]> {
-    const userObjectId = new Types.ObjectId(userId);
-
-    return this.circleModel
-      .find({
-        $or: [
-          { 'members.userId': userObjectId }, // Busca en miembros (Practice)
-          { 'mentors.userId': userObjectId }, // Busca en mentores (Exchange)
-          { 'learners.userId': userObjectId }, // Busca en aprendices (Exchange)
-        ],
-      })
-      .exec();
   }
 
   async findOne(id: string): Promise<Circle> {
@@ -66,37 +47,28 @@ export class CirclesService {
     return circle;
   }
 
+  // 2. CUSTOM QUERIES
+
+  async findMyCircles(userId: string): Promise<Circle[]> {
+    const userObjectId = new Types.ObjectId(userId);
+
+    return this.circleModel
+      .find({
+        'members.userId': userObjectId, // Busca en miembros (Practice)
+      })
+      .exec();
+  }
+
   async findByType(type: string): Promise<Circle[]> {
     return this.circleModel.find({ type }).exec();
   }
 
-  // User action methods
-  async requestJoinCircle(
-    circleId: string,
-    memberData: JoinRequestDto,
-  ): Promise<Circle> {
-    const userObjectId = new Types.ObjectId(memberData.userId);
-    const newMember: CircleMember = {
-      ...memberData,
-      isMentor: false,
-      userId: userObjectId,
-    };
+  // USER MANAGEMENT METHODS
 
-    const exists = await this.circleModel.findOne({
-      _id: circleId,
-      $or: [
-        { 'members.userId': userObjectId },
-        { 'requests.userId': userObjectId },
-      ],
-    });
-
-    if (exists) {
-      throw new Error('User is already a member or has a pending request');
-    }
-
+  async addMember(circleId: string, memberData: CircleMember): Promise<Circle> {
     const updatedCircle = await this.circleModel.findByIdAndUpdate(
       circleId,
-      { $push: { requests: newMember } },
+      { $push: { members: memberData } },
       { new: true },
     );
 
@@ -119,35 +91,86 @@ export class CirclesService {
     return updatedCircle;
   }
 
-  // Admin action methods
-  async approveRequest(circleId: string, userId: string): Promise<Circle> {
-    const userObjectId = new Types.ObjectId(userId);
-    const circle = await this.circleModel.findOne({
-      _id: circleId,
-      'requests.userId': userObjectId,
-    });
+  // VALIDATIONS AND HELPERS
 
-    if (!circle) {
-      throw new NotFoundException(
-        `No pending request found for user ID ${userId} in circle ID ${circleId}`,
-      );
-    }
-
-    const memberData = circle.requests?.find(
-      (req) => req.userId.toString() === userId,
-    );
-    const updatedCircle = await this.circleModel.findByIdAndUpdate(
-      circleId,
-      {
-        $pull: { requests: { userId: userObjectId } },
-        $push: { members: memberData },
-      },
-      { new: true },
-    );
-
-    if (!updatedCircle) {
-      throw new NotFoundException(`Circle with ID ${circleId} not found`);
-    }
-    return updatedCircle;
+  async exists(circleId: string): Promise<boolean> {
+    if (!Types.ObjectId.isValid(circleId)) return false;
+    const exists = await this.circleModel.exists({ _id: circleId });
+    return !!exists;
   }
+
+  async isMember(circleId: string, userId: string): Promise<boolean> {
+    const userObjectId = new Types.ObjectId(userId);
+    const count = await this.circleModel.countDocuments({
+      _id: circleId,
+      'members.userId': userObjectId,
+    });
+    return count > 0;
+  }
+
+  // async requestJoinCircle(
+  //   circleId: string,
+  //   memberData: JoinRequestDto,
+  // ): Promise<Circle> {
+  //   const userObjectId = new Types.ObjectId(memberData.userId);
+  //   const newMember: CircleMember = {
+  //     ...memberData,
+  //     isMentor: false,
+  //     userId: userObjectId,
+  //   };
+
+  //   const exists = await this.circleModel.findOne({
+  //     _id: circleId,
+  //     $or: [
+  //       { 'members.userId': userObjectId },
+  //       { 'requests.userId': userObjectId },
+  //     ],
+  //   });
+
+  //   if (exists) {
+  //     throw new Error('User is already a member or has a pending request');
+  //   }
+
+  //   const updatedCircle = await this.circleModel.findByIdAndUpdate(
+  //     circleId,
+  //     { $push: { requests: newMember } },
+  //     { new: true },
+  //   );
+
+  //   if (!updatedCircle) {
+  //     throw new NotFoundException(`Circle with ID ${circleId} not found`);
+  //   }
+  //   return updatedCircle;
+  // }
+
+  // async approveRequest(circleId: string, userId: string): Promise<Circle> {
+  //   const userObjectId = new Types.ObjectId(userId);
+  //   const circle = await this.circleModel.findOne({
+  //     _id: circleId,
+  //     'requests.userId': userObjectId,
+  //   });
+
+  //   if (!circle) {
+  //     throw new NotFoundException(
+  //       `No pending request found for user ID ${userId} in circle ID ${circleId}`,
+  //     );
+  //   }
+
+  //   const memberData = circle.requests?.find(
+  //     (req) => req.userId.toString() === userId,
+  //   );
+  //   const updatedCircle = await this.circleModel.findByIdAndUpdate(
+  //     circleId,
+  //     {
+  //       $pull: { requests: { userId: userObjectId } },
+  //       $push: { members: memberData },
+  //     },
+  //     { new: true },
+  //   );
+
+  //   if (!updatedCircle) {
+  //     throw new NotFoundException(`Circle with ID ${circleId} not found`);
+  //   }
+  //   return updatedCircle;
+  // }
 }
