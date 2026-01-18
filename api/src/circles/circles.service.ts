@@ -39,7 +39,7 @@ export class CirclesService {
     return this.circleModel.find().exec();
   }
 
-  async findOne(id: string): Promise<Circle> {
+  async findById(id: string): Promise<Circle> {
     const circle = await this.circleModel.findById(id).exec();
     if (!circle) {
       throw new NotFoundException(`Circle with ID ${id} not found`);

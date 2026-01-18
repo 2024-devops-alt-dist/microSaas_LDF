@@ -36,8 +36,8 @@ export class CirclesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.circlesService.findOne(id);
+  findById(@Param('id') id: string) {
+    return this.circlesService.findById(id);
   }
 
   // --- BASIC CRUD ---

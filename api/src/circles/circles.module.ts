@@ -10,5 +10,6 @@ import { Circle, CircleSchema } from './schemas/circle.schema';
   ],
   controllers: [CirclesController],
   providers: [CirclesService],
+  exports: [CirclesService],
 })
 export class CirclesModule {}
