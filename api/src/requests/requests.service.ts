@@ -1,26 +1,188 @@
-import { Injectable } from '@nestjs/common';
-import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Request, RequestDocument } from './schemas/request.schema';
+import { CirclesService } from '../circles/circles.service';
+import { UsersService } from '../users/users.service';
+import { CircleMember } from '../circles/schemas/circle-member.schema';
+import { MatchCriteriaDto, RequestRole } from './dto/match-criteria.dto';
 
 @Injectable()
 export class RequestsService {
-  create(createRequestDto: CreateRequestDto) {
-    return 'This action adds a new request';
+  private readonly MAX_CIRCLE_CAPACITY = 20;
+
+  constructor(
+    @InjectModel(Request.name) private requestModel: Model<RequestDocument>,
+    private circlesService: CirclesService,
+    private usersService: UsersService,
+  ) {}
+
+  // ==================================================================
+  // 1. CREAR SOLICITUD DE UNIÓN (Con Reglas de Negocio)
+  // ==================================================================
+  async createJoinRequest(
+    userId: string,
+    circleId: string,
+    criteria: MatchCriteriaDto,
+  ) {
+    const circle = await this.circlesService.findById(circleId);
+    if (!circle) throw new NotFoundException('Circle not found');
+
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const isMember = await this.circlesService.isMember(circleId, userId);
+    if (isMember) {
+      throw new BadRequestException('User is already a member of this circle');
+    }
+
+    const existingRequest = await this.requestModel.findOne({
+      userId: new Types.ObjectId(userId),
+      targetCircleId: new Types.ObjectId(circleId),
+      status: 'PENDING',
+    });
+    if (existingRequest) {
+      throw new BadRequestException(
+        'User already has a pending request for this circle',
+      );
+    }
+
+    // VALIDATION OF CRITERIA
+    if (criteria.role === RequestRole.MENTOR) {
+      const isNative = user.nativeLanguages.includes(criteria.language);
+      const isAdvanced = user.targetLanguages.find(
+        (t) => t.language === criteria.language && t.level === 'ADVANCED',
+      );
+      // it must be at least one of both to be a MENTOR
+      if (!isNative && !isAdvanced) {
+        throw new BadRequestException(
+          `To be a Mentor in ${criteria.language}, you must be NATIVE or ADVANCED.`,
+        );
+      }
+      if (isNative) {
+        criteria.level = 'NATIVE';
+      } else {
+        criteria.level = 'ADVANCED';
+      }
+    } else {
+      const targetLang = user.targetLanguages.find(
+        (t) => t.language === criteria.language,
+      );
+      if (!targetLang) {
+        throw new BadRequestException(
+          `User is not learning ${criteria.language}`,
+        );
+      }
+      criteria.level = targetLang.level;
+    }
+
+    // ==================================================================
+    // REGLAS DE NEGOCIO AVANZADAS
+    // ==================================================================
+
+    // REGLA D: Capacidad Máxima
+    if (circle.members.length >= this.MAX_CIRCLE_CAPACITY) {
+      throw new BadRequestException('Circle has reached maximum capacity');
+    }
+
+    // REGLA C: Coincidencia de Idioma
+    if (!circle.languages.includes(criteria.language)) {
+      throw new BadRequestException(
+        'This circle does not support the requested language',
+      );
+    }
+
+    // REGLA B: Nivel (Validación)
+    if (circle.level === 'ADVANCED' && criteria.level === 'BEGINNER') {
+      throw new BadRequestException('Beginners cannot join Advanced circles');
+    }
+
+    // REGLA A: Ratio de Exchange (1 Mentor cada 4 Learners)
+    if (circle.type === 'EXCHANGE' && criteria.role === RequestRole.LEARNER) {
+      const currentMentors = circle.members.filter(
+        (m) => m.role === 'MENTOR',
+      ).length;
+      const currentLearners = circle.members.filter(
+        (m) => m.role === 'LEARNER',
+      ).length;
+
+      if (currentMentors === 0) {
+        throw new BadRequestException(
+          'This circle needs a Mentor before accepting Learners',
+        );
+      }
+
+      const projectedRatio = (currentLearners + 1) / currentMentors;
+      if (projectedRatio > 4) {
+        throw new BadRequestException(
+          'Circle requires more Mentors to maintain the Exchange ratio',
+        );
+      }
+    }
+    // ==================================================================
+    // FIN VALIDACIONES - CREAR REQUEST
+    // ==================================================================
+
+    const newRequest = new this.requestModel({
+      userId: new Types.ObjectId(userId),
+      targetCircleId: new Types.ObjectId(circleId),
+      type: 'JOIN',
+      status: 'PENDING',
+      memberName: user.name,
+      matchCriteria: criteria,
+    });
+
+    return newRequest.save();
   }
 
-  findAll() {
-    return `This action returns all requests`;
+  // ==================================================================
+  // 2. APROBAR SOLICITUD
+  // ==================================================================
+  async approveRequest(requestId: string) {
+    const request = await this.requestModel.findById(requestId);
+    if (!request) {
+      throw new NotFoundException('Request not found');
+    }
+
+    if (request.status !== 'PENDING') {
+      throw new BadRequestException(`Request is already ${request.status}`);
+    }
+    const circle = await this.circlesService.findById(
+      request.targetCircleId.toString(),
+    );
+    if (!circle) throw new NotFoundException('Target Circle not found');
+
+    const { role, language, level } = request.matchCriteria;
+
+    const memberData: CircleMember = {
+      userId: request.userId,
+      name: request.memberName,
+      role: role,
+      level: level,
+      language: language,
+      joinedAt: new Date(),
+    };
+
+    await this.circlesService.addMember(
+      request.targetCircleId.toString(),
+      memberData,
+    );
+
+    request.status = 'MATCHED';
+    return request.save();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} request`;
-  }
-
-  update(id: number, updateRequestDto: UpdateRequestDto) {
-    return `This action updates a #${id} request`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} request`;
+  async findAllPendingForCircle(circleId: string) {
+    return this.requestModel
+      .find({
+        targetCircleId: new Types.ObjectId(circleId),
+        status: 'PENDING',
+      })
+      .populate('userId', 'name avatar email')
+      .exec();
   }
 }

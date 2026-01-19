@@ -1,42 +1,30 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Post, Body, Param, Get } from '@nestjs/common';
 import { RequestsService } from './requests.service';
-import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
+import { CreateJoinRequestDto } from './dto/create-join-request.dto';
 
 @Controller('requests')
 export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
-  @Post()
-  create(@Body() createRequestDto: CreateRequestDto) {
-    return this.requestsService.create(createRequestDto);
+  // 1.Crete Join Request
+  @Post('join')
+  async requestJoin(@Body() createJoinRequestDto: CreateJoinRequestDto) {
+    return this.requestsService.createJoinRequest(
+      createJoinRequestDto.userId,
+      createJoinRequestDto.circleId,
+      createJoinRequestDto.matchCriteria,
+    );
   }
 
-  @Get()
-  findAll() {
-    return this.requestsService.findAll();
+  // 2. Approve Join Request (Admin)
+  @Post(':id/approve')
+  async approveRequest(@Param('id') requestId: string) {
+    return this.requestsService.approveRequest(requestId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.requestsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRequestDto: UpdateRequestDto) {
-    return this.requestsService.update(+id, updateRequestDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.requestsService.remove(+id);
+  // 3. Show pending requests for a circle)
+  @Get('circle/:circleId')
+  async getPendingRequests(@Param('circleId') circleId: string) {
+    return this.requestsService.findAllPendingForCircle(circleId);
   }
 }

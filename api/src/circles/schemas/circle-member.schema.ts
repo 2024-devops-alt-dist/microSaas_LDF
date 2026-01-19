@@ -16,6 +16,12 @@ export class CircleMember {
   })
   role: string;
 
+  @Prop()
+  level: string;
+
+  @Prop()
+  language: string;
+
   @Prop({ default: Date.now })
   joinedAt: Date;
 }
