@@ -15,10 +15,14 @@ export class Message {
   content: string;
 
   @Prop({ required: true, enum: ['TEXT', 'IMAGE', 'AUDIO'], default: 'TEXT' })
-  type: string;
+  messageType: string;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
-  readBy: Types.ObjectId[];
+  @Prop()
+  mediaUrl?: string;
+
+  //for a future feature
+  // @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
+  // readBy: Types.ObjectId[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
