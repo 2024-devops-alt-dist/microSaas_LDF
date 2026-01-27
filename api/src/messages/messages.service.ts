@@ -1,26 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Message, MessageDocument } from './schemas/message.schema';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
 
 @Injectable()
 export class MessagesService {
-  create(createMessageDto: CreateMessageDto) {
-    return 'This action adds a new message';
+  constructor(
+    @InjectModel(Message.name) private messageModel: Model<MessageDocument>,
+  ) {}
+
+  // Save Message when sent
+  async create(createMessageDto: CreateMessageDto, userId: string) {
+    const newMessage = new this.messageModel({
+      content: createMessageDto.content,
+      circleId: new Types.ObjectId(createMessageDto.circleId),
+      senderId: new Types.ObjectId(userId),
+      messageType: createMessageDto.messageType || 'TEXT',
+      mediaUrl: createMessageDto.mediaUrl,
+    });
+
+    const savedMessage = await newMessage.save();
+
+    // Populate
+    return savedMessage.populate('senderId', 'name');
   }
 
-  findAll() {
-    return `This action returns all messages`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
-  }
-
-  update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} message`;
+  // Get history of messages in a circle
+  async findAllByCircle(circleId: string) {
+    return this.messageModel
+      .find({ circleId: new Types.ObjectId(circleId) })
+      .sort({ createdAt: 1 }) // Old ones first
+      .populate('senderId', 'name ')
+      .exec();
   }
 }
