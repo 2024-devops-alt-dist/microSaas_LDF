@@ -10,7 +10,7 @@ import { EventsModule } from './events/events.module';
 import { MessagesModule } from './messages/messages.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RequestsModule } from './requests/requests.module';
-
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,6 +30,7 @@ import { RequestsModule } from './requests/requests.module';
     MessagesModule,
     NotificationsModule,
     RequestsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
