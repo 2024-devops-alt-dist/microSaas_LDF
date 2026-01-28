@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Controller,
   Post,
@@ -6,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Request,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterAuthDto } from './dto/register-auth.dto';
@@ -17,6 +20,11 @@ import { UserDocument } from 'src/users/schemas/user.schema';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
+  }
   @Post('register')
   register(@Body() registerDto: RegisterAuthDto) {
     return this.authService.register(registerDto);
