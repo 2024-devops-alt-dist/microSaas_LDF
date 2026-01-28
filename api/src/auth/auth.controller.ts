@@ -1,12 +1,34 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { RegisterAuthDto } from './dto/register-auth.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import { UserDocument } from 'src/users/schemas/user.schema';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('test-token')
-  login(@Body() body: { userId: string }) {
-    return this.authService.generateTestToken(body.userId);
+  @Post('register')
+  register(@Body() registerDto: RegisterAuthDto) {
+    return this.authService.register(registerDto);
+  }
+
+  @UseGuards(AuthGuard('local'))
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  login(
+    @Body() loginDto: LoginAuthDto,
+    @Request() req: { user: UserDocument },
+  ) {
+    return this.authService.login(req.user);
   }
 }
