@@ -1,16 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Circle } from './schemas/circle.schema';
 import { CircleMember } from './schemas/circle-member.schema';
+import { CreateCircleDto } from './dto/create-circle.dto';
+import { UpdateCircleDto } from './dto/update-circle.dto';
 
 @Injectable()
 export class CirclesService {
   constructor(@InjectModel(Circle.name) private circleModel: Model<Circle>) {}
 
   // 1. CORE CRUD
-  async create(creatCircleDto: any): Promise<Circle> {
+  async create(creatCircleDto: CreateCircleDto): Promise<Circle> {
     const createdCircle = new this.circleModel(creatCircleDto);
     return createdCircle.save();
   }
@@ -23,7 +24,7 @@ export class CirclesService {
     return deletedCircle;
   }
 
-  async update(id: string, updateCircleDto: any): Promise<Circle> {
+  async update(id: string, updateCircleDto: UpdateCircleDto): Promise<Circle> {
     const updatedCircle = await this.circleModel.findByIdAndUpdate(
       id,
       updateCircleDto,
