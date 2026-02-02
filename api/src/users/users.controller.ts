@@ -10,10 +10,16 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Request as ExpressRequest } from 'express';
+import { User } from './schemas/user.schema';
 
 interface ExpressRequestWithUser extends ExpressRequest {
   user: {
@@ -22,39 +28,52 @@ interface ExpressRequestWithUser extends ExpressRequest {
 }
 
 @ApiTags('Users')
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(AuthGuard('jwt'))
   @Post()
   @ApiOperation({ summary: 'Create a new user (Admin only)' })
+  @ApiResponse({
+    status: 201,
+    description: 'The user has been successfully created.',
+  })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(AuthGuard('jwt'))
   @Get()
   @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all users in the application.',
+    type: [User],
+  })
   findAll() {
     return this.usersService.findAll();
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   @ApiOperation({ summary: 'Get my user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'The profile of the authenticated user.',
+    type: User,
+  })
   getProfile(@Request() req: ExpressRequestWithUser) {
     const myId = req.user.userId;
     return this.usersService.findOne(myId);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(AuthGuard('jwt'))
   @Put('profile')
   @ApiOperation({ summary: 'Actualizar mis datos' })
+  @ApiResponse({
+    status: 200,
+    description: 'The user profile has been successfully updated.',
+    type: User,
+  })
   updateProfile(
     @Request() req: ExpressRequestWithUser,
     @Body() updateUserDto: UpdateUserDto,
@@ -63,10 +82,13 @@ export class UsersController {
     return this.usersService.update(myId, updateUserDto);
   }
 
-  @ApiBearerAuth('access-token')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Get a user by ID (Public profile)' })
   @Get(':id')
+  @ApiOperation({ summary: 'Get a user by ID (Public profile)' })
+  @ApiResponse({
+    status: 200,
+    description: 'The user with the specified ID.',
+    type: User,
+  })
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
