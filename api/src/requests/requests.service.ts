@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Request, RequestDocument } from './schemas/request.schema';
+import { RequestEntity, RequestDocument } from './schemas/request.schema';
 import { CirclesService } from '../circles/circles.service';
 import { UsersService } from '../users/users.service';
 import { CircleMember } from '../circles/schemas/circle-member.schema';
@@ -16,7 +16,8 @@ export class RequestsService {
   private readonly MAX_CIRCLE_CAPACITY = 20;
 
   constructor(
-    @InjectModel(Request.name) private requestModel: Model<RequestDocument>,
+    @InjectModel(RequestEntity.name)
+    private requestModel: Model<RequestDocument>,
     private circlesService: CirclesService,
     private usersService: UsersService,
   ) {}
