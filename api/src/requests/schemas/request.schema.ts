@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import { RequestRole } from '../dto/match-criteria.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
-export type RequestDocument = HydratedDocument<RequestEntity>;
+export type RequestDocument = HydratedDocument<CircleRequest>;
 
 @Schema({ _id: false })
 export class MatchCriteria {
@@ -32,8 +32,8 @@ export class MatchCriteria {
 }
 
 const MatchCriteriaSchema = SchemaFactory.createForClass(MatchCriteria);
-@Schema({ timestamps: true })
-export class RequestEntity {
+@Schema({ timestamps: true, collection: 'circle_requests' })
+export class CircleRequest {
   @ApiProperty({
     type: String,
     description: 'Internal ID of the request',
@@ -96,4 +96,4 @@ export class RequestEntity {
   matchCriteria: MatchCriteria;
 }
 
-export const RequestSchema = SchemaFactory.createForClass(RequestEntity);
+export const RequestSchema = SchemaFactory.createForClass(CircleRequest);

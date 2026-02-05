@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { RequestEntity, RequestDocument } from './schemas/request.schema';
+import { CircleRequest, RequestDocument } from './schemas/request.schema';
 import { CirclesService } from '../circles/circles.service';
 import { UsersService } from '../users/users.service';
 import { CircleMember } from '../circles/schemas/circle-member.schema';
@@ -16,7 +16,7 @@ export class RequestsService {
   private readonly MAX_CIRCLE_CAPACITY = 20;
 
   constructor(
-    @InjectModel(RequestEntity.name)
+    @InjectModel(CircleRequest.name)
     private requestModel: Model<RequestDocument>,
     private circlesService: CirclesService,
     private usersService: UsersService,
@@ -71,7 +71,9 @@ export class RequestsService {
       }
     } else {
       const targetLang = user.targetLanguages.find(
-        (t) => t.language === criteria.language,
+        (t) =>
+          t.language.trim().toLowerCase() ===
+          criteria.language.trim().toLowerCase(),
       );
       if (!targetLang) {
         throw new BadRequestException(
@@ -104,23 +106,28 @@ export class RequestsService {
 
     // REGLA A: Ratio de Exchange (1 Mentor cada 4 Learners)
     if (circle.type === 'EXCHANGE' && criteria.role === RequestRole.LEARNER) {
-      const currentMentors = circle.members.filter(
-        (m) => m.role === 'MENTOR',
-      ).length;
-      const currentLearners = circle.members.filter(
-        (m) => m.role === 'LEARNER',
+      const mentorsOfTargetLanguage = circle.members.filter(
+        (m) => m.role === 'MENTOR' && m.language === criteria.language,
       ).length;
 
-      if (currentMentors === 0) {
+      const learnersOfTargetLanguage = circle.members.filter(
+        (m) => m.role === 'LEARNER' && m.language === criteria.language,
+      ).length;
+
+      // CASE 1: No mentor for the langauge
+      if (mentorsOfTargetLanguage === 0) {
         throw new BadRequestException(
-          'This circle needs a Mentor before accepting Learners',
+          `This circle needs a ${criteria.language} Mentor before accepting more ${criteria.language} Learners.`,
         );
       }
 
-      const projectedRatio = (currentLearners + 1) / currentMentors;
+      // CASE 2: We calculate the ratio for the langauge
+      const projectedRatio =
+        (learnersOfTargetLanguage + 1) / mentorsOfTargetLanguage;
+
       if (projectedRatio > 4) {
         throw new BadRequestException(
-          'Circle requires more Mentors to maintain the Exchange ratio',
+          `The ratio for ${criteria.language} is full. We need more Mentors of ${criteria.language}.`,
         );
       }
     }
@@ -171,6 +178,12 @@ export class RequestsService {
     await this.circlesService.addMember(
       request.targetCircleId.toString(),
       memberData,
+    );
+
+    await this.usersService.linkUserToCircle(
+      request.userId.toString(),
+      request.targetCircleId.toString(),
+      circle.type,
     );
 
     request.status = 'MATCHED';

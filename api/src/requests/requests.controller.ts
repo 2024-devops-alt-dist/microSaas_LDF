@@ -16,7 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { RequestEntity } from './schemas/request.schema';
+import { CircleRequest } from './schemas/request.schema';
 
 interface ExpressRequestWithUser {
   user: {
@@ -35,7 +35,7 @@ export class RequestsController {
   @ApiOperation({ summary: 'Create a join request to a circle' })
   @ApiResponse({
     status: 201,
-    type: RequestEntity,
+    type: CircleRequest,
     description: 'The join request has been created.',
   })
   async requestJoin(
@@ -54,7 +54,7 @@ export class RequestsController {
   @ApiOperation({ summary: 'Approve a join request' })
   @ApiResponse({
     status: 200,
-    type: RequestEntity,
+    type: CircleRequest,
   })
   async approveRequest(@Param('id') requestId: string) {
     // TODO: Check if the user is an admin of the circle
@@ -67,7 +67,7 @@ export class RequestsController {
   @ApiResponse({
     status: 200,
     description: 'List of pending requests for the specified circle.',
-    type: [RequestEntity],
+    type: [CircleRequest],
   })
   async getPendingRequests(@Param('circleId') circleId: string) {
     return this.requestsService.findAllPendingForCircle(circleId);
