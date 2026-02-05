@@ -27,12 +27,12 @@ FROM node:current-alpine AS production
 
 WORKDIR /app
 
-COPY --from=build /app/package.json ./
+COPY --from=builder /app/package.json ./
 
 RUN npm install --only=production
 
 # Copy the built application from the previous stage
-COPY --from=build /app/dist ./dist
+COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
 
