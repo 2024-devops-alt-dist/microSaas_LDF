@@ -186,8 +186,8 @@ export class RequestsService {
       circle.type,
     );
 
-    request.status = 'APPROVED';
-    await request.save();
+    request.status = 'MATCHED';
+    return request.save();
   }
 
   async findAllPendingForCircle(circleId: string) {
