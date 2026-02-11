@@ -1,7 +1,7 @@
 #### STAGE 1: Development ####
 
 # Use the official Node.js image as the base image
-FROM node:current-alpine AS development
+FROM node:18-alpine AS development
 
 # Set the working directory
 WORKDIR /app
@@ -23,7 +23,7 @@ RUN npm run build
 
 #### STAGE 3: Run ####
 
-FROM node:current-alpine AS production
+FROM node:18-alpine AS production
 
 WORKDIR /app
 
