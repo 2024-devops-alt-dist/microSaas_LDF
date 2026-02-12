@@ -1,7 +1,9 @@
 #### STAGE 1: Development ####
 
 # Use the official Node.js image as the base image
-FROM node:current-alpine AS development
+FROM node:22-alpine AS development
+
+RUN apk update && apk upgrade --no-cache
 
 # Set the working directory
 WORKDIR /app
@@ -23,16 +25,16 @@ RUN npm run build
 
 #### STAGE 3: Run ####
 
-FROM node:current-alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
 
-COPY --from=build /app/package.json ./
+COPY --from=builder /app/package.json ./
 
 RUN npm install --only=production
 
 # Copy the built application from the previous stage
-COPY --from=build /app/dist ./dist
+COPY --from=builder /app/dist ./dist
 
 ENV NODE_ENV=production
 

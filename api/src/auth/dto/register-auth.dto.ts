@@ -1,38 +1,38 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
-  IsString,
   IsEmail,
   IsNotEmpty,
-  IsArray,
-  IsOptional,
+  IsString,
+  MinLength,
   IsDateString,
+  IsArray,
   ValidateNested,
   IsEnum,
+  IsOptional,
 } from 'class-validator';
 
-export class TargetLanguageDto {
+export class RegisterTargetLanguageDto {
   @ApiProperty({
     example: 'ES',
-    description: 'Language code of the target language',
+    description: 'Target language code (ISO 639-1)',
   })
-  @Transform(({ value }: { value: string }) => value?.toUpperCase().trim())
   @IsString()
   @IsNotEmpty()
   language: string;
 
   @ApiProperty({
     example: 'BEGINNER',
-    description: 'Proficiency level in the target language',
+    description: 'Nivel de competencia',
+    enum: ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'],
   })
-  @Transform(({ value }: { value: string }) => value?.toUpperCase().trim())
   @IsString()
   @IsNotEmpty()
   @IsEnum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED'])
   level: string;
 }
 
-export class CreateUserDto {
+export class RegisterAuthDto {
   @ApiProperty({
     example: 'John Doe',
     description: 'Full name of the user',
@@ -45,7 +45,6 @@ export class CreateUserDto {
     example: 'johndoe@example.com',
     description: 'Email address of the user',
   })
-  @Transform(({ value }: { value: string }) => value?.toLowerCase().trim())
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -54,8 +53,9 @@ export class CreateUserDto {
     example: 'strongPassword123',
     description: 'Password for the user account',
   })
-  @IsString()
   @IsNotEmpty()
+  @IsString()
+  @MinLength(6, { message: 'Password must be at least 6 characters' })
   password: string;
 
   @ApiProperty({
@@ -78,29 +78,23 @@ export class CreateUserDto {
     example: ['EN', 'FR'],
     description: 'Array of native language codes of the user',
   })
-  @Transform(({ value }: { value: string[] }) => {
-    if (Array.isArray(value)) {
-      return value.map((v: string) => v.toUpperCase().trim());
-    }
-    return value;
-  })
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty()
   nativeLanguages: string[];
 
   @ApiProperty({
-    type: [TargetLanguageDto],
+    type: [RegisterTargetLanguageDto],
     description: 'Array of target languages with proficiency levels',
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => TargetLanguageDto)
-  targetLanguages: TargetLanguageDto[];
+  @Type(() => RegisterTargetLanguageDto)
+  targetLanguages: RegisterTargetLanguageDto[];
 
   @ApiProperty({
-    example: 'https://example.com/avatar.jpg',
-    description: 'URL of the user avatar',
+    example: 'https://example.com/avatars/johndoe.jpg',
+    description: 'URL of the user avatar image',
     required: false,
   })
   @IsString()
