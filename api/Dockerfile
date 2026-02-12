@@ -1,7 +1,9 @@
 #### STAGE 1: Development ####
 
 # Use the official Node.js image as the base image
-FROM node:current-alpine AS development
+FROM node:22-alpine AS development
+
+RUN apk update && apk upgrade --no-cache
 
 # Set the working directory
 WORKDIR /app
@@ -23,7 +25,7 @@ RUN npm run build
 
 #### STAGE 3: Run ####
 
-FROM node:current-alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
 

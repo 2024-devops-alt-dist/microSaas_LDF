@@ -15,24 +15,66 @@ import { RegisterAuthDto } from './dto/register-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { UserDocument } from 'src/users/schemas/user.schema';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  // PROFILE
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get the profile of the authenticated user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The profile of the authenticated user.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Token missing or invalid.',
+  })
   getProfile(@Request() req) {
     return req.user;
   }
+
+  // REGISTER
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({
+    status: 201,
+    description: 'The userhas been successfully registered.',
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Bad Request. The email is already in use or validation failed.',
+  })
   register(@Body() registerDto: RegisterAuthDto) {
     return this.authService.register(registerDto);
   }
 
+  // LOGIN
   @UseGuards(AuthGuard('local'))
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login a user' })
+  @ApiResponse({
+    status: 200,
+    description: 'The userhas been successfully logged in.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized. Invalid credentials.',
+  })
+  @ApiBody({ type: LoginAuthDto })
   login(
     @Body() loginDto: LoginAuthDto,
     @Request() req: { user: UserDocument },

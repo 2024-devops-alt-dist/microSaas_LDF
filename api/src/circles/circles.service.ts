@@ -1,18 +1,75 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Circle } from './schemas/circle.schema';
 import { CircleMember } from './schemas/circle-member.schema';
 import { CreateCircleDto } from './dto/create-circle.dto';
 import { UpdateCircleDto } from './dto/update-circle.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class CirclesService {
-  constructor(@InjectModel(Circle.name) private circleModel: Model<Circle>) {}
+  constructor(
+    @InjectModel(Circle.name) private circleModel: Model<Circle>,
+    private usersService: UsersService,
+  ) {}
 
   // 1. CORE CRUD
-  async create(creatCircleDto: CreateCircleDto): Promise<Circle> {
-    const createdCircle = new this.circleModel(creatCircleDto);
+  async create(
+    createCircleDto: CreateCircleDto,
+    creatorId: string,
+  ): Promise<Circle> {
+    const user = await this.usersService.findOne(creatorId);
+    if (!user) throw new NotFoundException('User not found');
+
+    let qualifiedLanguage: string | undefined = undefined;
+    let initialLevel = 'NATIVE';
+
+    if ((createCircleDto.type as string) === 'EXCHANGE') {
+      qualifiedLanguage = createCircleDto.languages.find((langCode) => {
+        const isNative = user.nativeLanguages.includes(langCode);
+        const isAdvanced = user.targetLanguages.some(
+          (t) => t.language === langCode && t.level === 'ADVANCED',
+        );
+
+        if (isAdvanced && !isNative) initialLevel = 'ADVANCED';
+
+        return isNative || isAdvanced;
+      });
+
+      if (!qualifiedLanguage) {
+        throw new BadRequestException(
+          `To create an Exchange Circle, you must be NATIVE or ADVANCED in at least one of the selected languages (${createCircleDto.languages.join(', ')}).`,
+        );
+      }
+    } else {
+      qualifiedLanguage = createCircleDto.languages[0];
+    }
+
+    const adminMember: CircleMember = {
+      userId: new Types.ObjectId(creatorId),
+      name: user.name,
+      role: 'ADMIN',
+      level: initialLevel,
+      language: qualifiedLanguage,
+      joinedAt: new Date(),
+    };
+
+    const createdCircle = new this.circleModel({
+      ...createCircleDto,
+      members: [adminMember],
+    });
+
+    await this.usersService.linkUserToCircle(
+      creatorId,
+      createdCircle._id.toString(),
+      createCircleDto.type,
+    );
+
     return createdCircle.save();
   }
 

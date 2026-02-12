@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -29,11 +30,17 @@ export class CreateCircleDto {
   name: string;
 
   @ApiProperty({ enum: CircleType, example: CircleType.PRACTICE })
+  @Transform(({ value }: { value: string }): string =>
+    value?.toUpperCase().trim(),
+  )
   @IsEnum(CircleType)
   @IsNotEmpty()
   type: CircleType;
 
   @ApiProperty({ enum: CircleLevel, example: CircleLevel.BEGINNER })
+  @Transform(({ value }: { value: string }): string =>
+    value?.toUpperCase().trim(),
+  )
   @IsEnum(CircleLevel)
   @IsNotEmpty()
   level: CircleLevel;
@@ -41,6 +48,12 @@ export class CreateCircleDto {
   @ApiProperty({
     example: ['ES', 'EN'],
     description: 'Array of language codes supported by the circle',
+  })
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.map((v: string) => v.toUpperCase().trim());
+    }
+    return value as string[];
   })
   @IsArray()
   @IsString({ each: true })

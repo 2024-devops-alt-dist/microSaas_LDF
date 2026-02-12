@@ -56,9 +56,12 @@ export class RequestsController {
     status: 200,
     type: CircleRequest,
   })
-  async approveRequest(@Param('id') requestId: string) {
+  async approveRequest(
+    @Param('id') requestId: string,
+    @Request() req: ExpressRequestWithUser,
+  ) {
     // TODO: Check if the user is an admin of the circle
-    return this.requestsService.approveRequest(requestId);
+    return this.requestsService.approveRequest(requestId, req.user.userId);
   }
 
   // 3. Show pending requests for a circle)
