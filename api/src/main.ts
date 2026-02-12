@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: process.env.FRONTEND_URL,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
@@ -14,6 +14,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
   const config = new DocumentBuilder()
@@ -28,7 +29,7 @@ async function bootstrap() {
         in: 'header',
         name: 'Authorization',
       },
-      'access-token', // This name here is important for later use
+      'access-token',
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);

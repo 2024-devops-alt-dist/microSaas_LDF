@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -22,9 +23,6 @@ export class RequestsService {
     private usersService: UsersService,
   ) {}
 
-  // ==================================================================
-  // 1. CREAR SOLICITUD DE UNIÓN (Con Reglas de Negocio)
-  // ==================================================================
   async createJoinRequest(
     userId: string,
     circleId: string,
@@ -83,28 +81,20 @@ export class RequestsService {
       criteria.level = targetLang.level;
     }
 
-    // ==================================================================
-    // REGLAS DE NEGOCIO AVANZADAS
-    // ==================================================================
-
-    // REGLA D: Capacidad Máxima
     if (circle.members.length >= this.MAX_CIRCLE_CAPACITY) {
       throw new BadRequestException('Circle has reached maximum capacity');
     }
 
-    // REGLA C: Coincidencia de Idioma
     if (!circle.languages.includes(criteria.language)) {
       throw new BadRequestException(
         'This circle does not support the requested language',
       );
     }
 
-    // REGLA B: Nivel (Validación)
     if (circle.level === 'ADVANCED' && criteria.level === 'BEGINNER') {
       throw new BadRequestException('Beginners cannot join Advanced circles');
     }
 
-    // REGLA A: Ratio de Exchange (1 Mentor cada 4 Learners)
     if (circle.type === 'EXCHANGE' && criteria.role === RequestRole.LEARNER) {
       const mentorsOfTargetLanguage = circle.members.filter(
         (m) => m.role === 'MENTOR' && m.language === criteria.language,
@@ -131,9 +121,6 @@ export class RequestsService {
         );
       }
     }
-    // ==================================================================
-    // FIN VALIDACIONES - CREAR REQUEST
-    // ==================================================================
 
     const newRequest = new this.requestModel({
       userId: new Types.ObjectId(userId),
@@ -147,10 +134,7 @@ export class RequestsService {
     return newRequest.save();
   }
 
-  // ==================================================================
-  // 2. APROBAR SOLICITUD
-  // ==================================================================
-  async approveRequest(requestId: string) {
+  async approveRequest(requestId: string, adminUserId: string) {
     const request = await this.requestModel.findById(requestId);
     if (!request) {
       throw new NotFoundException('Request not found');
@@ -163,6 +147,19 @@ export class RequestsService {
       request.targetCircleId.toString(),
     );
     if (!circle) throw new NotFoundException('Target Circle not found');
+
+    const adminMember = circle.members.find(
+      (m) => m.userId.toString() === adminUserId,
+    );
+    if (!adminMember) {
+      throw new ForbiddenException('You are not a member of this circle');
+    }
+
+    if (adminMember.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Only the Circle Admin can approve requests',
+      );
+    }
 
     const { role, language, level } = request.matchCriteria;
 
@@ -196,7 +193,11 @@ export class RequestsService {
         targetCircleId: new Types.ObjectId(circleId),
         status: 'PENDING',
       })
-      .populate('userId', 'name avatar email')
+      .select('-memberName')
+      .populate(
+        'userId',
+        'nativeLanguages targetLanguages -name -avatar -email',
+      )
       .exec();
   }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsString,
   IsEmail,
@@ -16,6 +16,7 @@ export class TargetLanguageDto {
     example: 'ES',
     description: 'Language code of the target language',
   })
+  @Transform(({ value }: { value: string }) => value?.toUpperCase().trim())
   @IsString()
   @IsNotEmpty()
   language: string;
@@ -24,11 +25,13 @@ export class TargetLanguageDto {
     example: 'BEGINNER',
     description: 'Proficiency level in the target language',
   })
+  @Transform(({ value }: { value: string }) => value?.toUpperCase().trim())
   @IsString()
   @IsNotEmpty()
   @IsEnum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED'])
   level: string;
 }
+
 export class CreateUserDto {
   @ApiProperty({
     example: 'John Doe',
@@ -42,6 +45,7 @@ export class CreateUserDto {
     example: 'johndoe@example.com',
     description: 'Email address of the user',
   })
+  @Transform(({ value }: { value: string }) => value?.toLowerCase().trim())
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -73,6 +77,12 @@ export class CreateUserDto {
   @ApiProperty({
     example: ['EN', 'FR'],
     description: 'Array of native language codes of the user',
+  })
+  @Transform(({ value }: { value: string[] }) => {
+    if (Array.isArray(value)) {
+      return value.map((v: string) => v.toUpperCase().trim());
+    }
+    return value;
   })
   @IsArray()
   @IsString({ each: true })

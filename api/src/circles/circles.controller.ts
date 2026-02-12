@@ -84,8 +84,11 @@ export class CirclesController {
     description: 'The circle has been successfully created.',
     type: Circle,
   })
-  create(@Body() createCircleDto: CreateCircleDto) {
-    return this.circlesService.create(createCircleDto);
+  async create(
+    @Body() createCircleDto: CreateCircleDto,
+    @Request() req: ExpressRequest & { user: { userId: string } },
+  ) {
+    return this.circlesService.create(createCircleDto, req.user.userId);
   }
 
   @Put(':id')
