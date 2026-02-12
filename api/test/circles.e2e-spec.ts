@@ -19,7 +19,7 @@ describe('AppController (e2e)', () => {
   let circleId: string;
   jest.setTimeout(60000);
 
-  // --- DATOS DE PRUEBA ---
+  // --- Test Data ---
   const mockUser = {
     email: 'test_admin_e2e@example.com',
     password: 'Password123!',
@@ -73,8 +73,6 @@ describe('AppController (e2e)', () => {
       .collection('users')
       .deleteMany({ email: mockUser.email });
     if (circleId) {
-      // Necesitamos castear a string o usar ObjectId si importas Types
-      // Para simplificar en el test, borramos por nombre si es necesario o por ID
       await dbConnection
         .collection('circles')
         .deleteOne({ name: mockCircle.name });
@@ -82,9 +80,9 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  // --- ESCENARIOS DEL TEST ---
+  // ---TEST SCENARIOS ---
 
-  // 1. REGISTRO
+  // 1. REGISTER
   it('/auth/register (POST) - should register a new user', async () => {
     const response = await request(app.getHttpServer() as Express)
       .post('/auth/register')
@@ -97,7 +95,7 @@ describe('AppController (e2e)', () => {
     userId = response.body.user.id;
   });
 
-  // 2. LOGIN (Conseguir la llave)
+  // 2. LOGIN
   it('/auth/login (POST) - should login and return JWT', async () => {
     const response = await request(app.getHttpServer() as Express)
       .post('/auth/login')
@@ -108,11 +106,11 @@ describe('AppController (e2e)', () => {
     jwtToken = response.body.access_token;
   });
 
-  // 3. CREAR CÍRCULO (Protegido + Validación de Lógica de Negocio)
+  // 3. CREATE CIRCLE
   it('/circles (POST) - should create circle and verify Admin role + Uppercase Transform', async () => {
     const response = await request(app.getHttpServer() as Express)
       .post('/circles')
-      .set('Authorization', `Bearer ${jwtToken}`) // Usamos el token del paso anterior
+      .set('Authorization', `Bearer ${jwtToken}`)
       .send(mockCircle)
       .expect(201);
 
@@ -127,7 +125,7 @@ describe('AppController (e2e)', () => {
     circleId = response.body._id;
   });
 
-  // 4. VERIFICAR PERFIL (Usuario vinculado al círculo)
+  // 4. VERIFY PROFILE
   it('/auth/profile (GET) - should show the active exchange circle', async () => {
     const response = await request(app.getHttpServer() as Express)
       .get('/users/profile')
@@ -139,4 +137,38 @@ describe('AppController (e2e)', () => {
     expect(user).toHaveProperty('activeExchangeId');
     expect(user.activeExchangeId).toBe(circleId);
   });
+
+  // // 5. BUSINESS RULE : A USER CAN ONLY HAVE ONE ACTIVE EXCHANGE CIRCLE
+  // it('/circles (POST) - should FAIL to create a second Exchange Circle', async () => {
+  //   return request(app.getHttpServer() as Express)
+  //     .post('/circles')
+  //     .set('Authorization', `Bearer ${jwtToken}`)
+  //     .send({
+  //       ...mockCircle,
+  //       name: 'Another Exchange Circle',
+  //     })
+  //     .expect(400)
+  //     .expect((res) => {
+  //       expect(res.body.message).toMatch(/already has an active exchange/i);
+  //     });
+  // });
+
+  // // 6. CONSISTENCY: Verify that the created circle can be retrieved and has correct details
+  // it('/circles/:id (GET) - should return the created circle details', async () => {
+  //   const response = await request(app.getHttpServer() as Express)
+  //     .get(`/circles/${circleId}`)
+  //     .set('Authorization', `Bearer ${jwtToken}`)
+  //     .expect(200);
+
+  //   expect(response.body.name).toBe(mockCircle.name);
+  //   expect(response.body.admin).toBeDefined();
+  // });
+
+  // // 7. SECURITY: Verify that unauthenticated requests are rejected
+  // it('/circles (POST) - should FAIL without JWT token', async () => {
+  //   return request(app.getHttpServer() as Express)
+  //     .post('/circles')
+  //     .send(mockCircle)
+  //     .expect(401);
+  // });
 });
