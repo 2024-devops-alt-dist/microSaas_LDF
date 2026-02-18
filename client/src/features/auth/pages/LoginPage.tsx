@@ -5,7 +5,7 @@ import { Button } from '@/shared/UI/Button';
 import { Input } from '@/shared/UI/Input';
 import { authApi } from '../api/auth.api';
 import { useAuth } from '../model/auth.context';
-import { Facebook, Apple } from 'lucide-react'; // Google suele ser un SVG de color, usaremos una G por ahora
+import { Facebook, Apple } from 'lucide-react';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export const LoginPage = () => {
     setError('');
     try {
       const data = await authApi.login(form);
-      login(data.access_token);
+      login(data.user);
       void navigate('/home');
     } catch (err: unknown) {
       setError('Invalid email or password');
@@ -33,13 +33,11 @@ export const LoginPage = () => {
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col justify-center items-center p-6">
       <div className="w-full max-w-md">
-        {/* Título */}
         <h1 className="font-title text-4xl font-bold text-brand-dark mb-8 text-left">
           Log in
         </h1>
 
-        <form onSubmit={void handleSubmit} className="space-y-5">
-          {/* Inputs con estilo del diseño */}
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
           <Input
             label="Email address"
             placeholder="helloworld@gmail.com"
@@ -60,7 +58,6 @@ export const LoginPage = () => {
               className="bg-white"
               labelStyle="text-brand-dark font-normal"
             />
-            {/* Link de Forgot Password alineado a la derecha */}
             <div className="flex justify-end mt-2">
               <Link
                 to="/forgot-password"
@@ -73,7 +70,6 @@ export const LoginPage = () => {
 
           {error && <div className="text-red-500 text-sm">{error}</div>}
 
-          {/* Botón Principal */}
           <Button
             fullWidth
             type="submit"
@@ -84,7 +80,6 @@ export const LoginPage = () => {
           </Button>
         </form>
 
-        {/* Separador */}
         <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300"></div>
@@ -96,7 +91,6 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        {/* Botones Sociales */}
         <div className="grid grid-cols-3 gap-4">
           <Button
             type="button"
@@ -110,7 +104,6 @@ export const LoginPage = () => {
             variant="social"
             className="rounded-xl border-none shadow-sm h-14"
           >
-            {/* Simulación del logo de Google de colores */}
             <span className="font-bold text-2xl bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-red-500 to-yellow-500">
               G
             </span>
@@ -124,7 +117,6 @@ export const LoginPage = () => {
           </Button>
         </div>
 
-        {/* Footer Link */}
         <p className="mt-10 text-center text-sm text-brand-dark">
           Don't have an account?{' '}
           <Link to="/register" className="font-bold hover:underline">

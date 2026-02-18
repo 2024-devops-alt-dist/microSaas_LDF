@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Request,
   Get,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterAuthDto } from './dto/register-auth.dto';
@@ -22,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -75,10 +77,23 @@ export class AuthController {
     description: 'Unauthorized. Invalid credentials.',
   })
   @ApiBody({ type: LoginAuthDto })
-  login(
+  async login(
     @Body() loginDto: LoginAuthDto,
     @Request() req: { user: UserDocument },
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.login(req.user);
+    const data = await this.authService.login(req.user);
+
+    res.cookie('access_token', data.access_token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    return {
+      message: 'Login successful',
+      user: req.user,
+    };
   }
 }

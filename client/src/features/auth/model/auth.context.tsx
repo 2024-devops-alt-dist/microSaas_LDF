@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import type { User } from '../types';
+import { authApi } from '../api/auth.api';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  isLoading: boolean;
+  login: (user: User) => void;
   logout: () => void;
 }
 
@@ -16,35 +19,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    const checkAuth = async () => {
       try {
-        const decoded = jwtDecode<User>(token);
-        setUser(decoded);
-        setIsAuthenticated(true);
-      } catch {
-        logout();
+        const userData = await authApi.getProfile();
+
+        if (userData) {
+          setUser(userData);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.log('No active session found');
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    void checkAuth();
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem('token', token);
-    const decoded = jwtDecode<User>(token);
-    setUser(decoded);
+  const login = (userData: User) => {
+    setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated, isLoading, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -5,5 +5,6 @@ export interface User {
 }
 
 export interface AuthResponse {
-  access_token: string;
+  message: string;
+  user: User;
 }
