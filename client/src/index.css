@@ -1,3 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin "daisyui";
+
+/* Aquí definimos tu tema usando la sintaxis de Tailwind v4 */
+@theme {
+  /* Tipografías */
+  --font-sans: 'Inter', sans-serif;
+  --font-title: 'Poppins', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+
+  /* Tus Colores Personalizados */
+  --color-brand-dark: #006d77;
+  --color-brand-light: #83c5be;
+  --color-brand-accent: #e29578;
+  --color-brand-bg: #edf6f9;
+
+  /* Animaciones (si las tuvieras) irían aquí también */
+}
+
+/* Configuración global */
+:root {
+  /* Esto aplica el color de fondo base automáticamente */
+  background-color: var(--color-brand-bg);
+  font-family: var(--font-sans);
+}
+
+/* Ajuste para que ocupe toda la pantalla siempre */
+body {
+  min-height: 100vh;
+}
