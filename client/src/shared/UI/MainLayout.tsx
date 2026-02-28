@@ -1,5 +1,5 @@
 import React from 'react';
-import { TopHeader } from './TopHeader';
+import { Header } from './Header';
 import { BottomNavbar } from './BottomNavbar';
 
 interface MainLayoutProps {
@@ -21,7 +21,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* 2. HEADER (Fixed above thanks to flex-col) */}
       <div className="relative z-10 shrink-0 w-full max-w-md mx-auto px-5 pt-8">
-        <TopHeader />
+        <Header />
       </div>
 
       {/* 3. SCROLL ZONE */}
