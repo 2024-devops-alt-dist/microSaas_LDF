@@ -9,7 +9,7 @@ import { Circle } from './schemas/circle.schema';
 import { CircleMember } from './schemas/circle-member.schema';
 import { CreateCircleDto } from './dto/create-circle.dto';
 import { UpdateCircleDto } from './dto/update-circle.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class CirclesService {

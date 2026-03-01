@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CirclesService } from './circles.service';
 import { CirclesController } from './circles.controller';
 import { Circle, CircleSchema } from './schemas/circle.schema';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [

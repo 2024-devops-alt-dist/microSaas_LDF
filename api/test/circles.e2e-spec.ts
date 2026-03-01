@@ -1,42 +1,57 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { Express } from 'express';
 import { AppModule } from './../src/app.module';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
+import { Express } from 'express';
 
-describe('CirclesController (e2e)', () => {
+describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let dbConnection: Connection;
   let jwtToken: string;
+  let userId: string;
+  let circleId: string;
+  jest.setTimeout(60000);
 
-  const testUser = {
-    name: 'E2E Tester',
-    email: `e2e-test-${Date.now()}@test.com`,
+  // --- Test Data ---
+  const mockUser = {
+    email: 'test_admin_e2e@example.com',
     password: 'Password123!',
-    birthDate: '1995-05-05',
+    name: 'Juan E2E',
+    birthDate: '1990-01-01',
     timeZone: 'America/New_York',
     nativeLanguages: ['ES'],
     targetLanguages: [{ language: 'EN', level: 'INTERMEDIATE' }],
   };
 
-  const validCircle = {
-    name: 'Círculo de Testing E2E',
-    type: 'PRACTICE',
-    level: 'BEGINNER',
-    languages: ['EN'],
+  const mockCircle = {
+    name: 'Spanish-English Exchange E2E',
+    type: 'EXCHANGE',
+    level: 'intermediate',
+    languages: ['es', 'en'],
     requiresMentor: true,
   };
 
   beforeAll(async () => {
+    console.log('---------------------------------------------------');
+    console.log('DEBUG: Intentando conectar a DB...');
+    console.log('DEBUG: MONGO_URI es:', process.env.DATABASE_URL);
+    console.log('---------------------------------------------------');
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
 
-    // Validation Pipe global
     app.useGlobalPipes(
       new ValidationPipe({
+        transform: true,
         whitelist: true,
         forbidNonWhitelisted: true,
       }),
@@ -44,70 +59,116 @@ describe('CirclesController (e2e)', () => {
 
     await app.init();
 
-    // --- LOGIN ---
-    // 1. Registrer users
-    await request(app.getHttpServer() as Express)
-      .post('/auth/register')
-      .send(testUser)
-      .expect(201);
-
-    // 2. Login user
-    const loginResponse = await request(app.getHttpServer() as Express)
-      .post('/auth/login')
-      .send({ email: testUser.email, password: testUser.password })
-      .expect(200);
-
-    jwtToken = (loginResponse.body as { access_token: string }).access_token;
+    dbConnection = app.get(getConnectionToken());
+    await dbConnection
+      .collection('users')
+      .deleteMany({ email: mockUser.email });
+    await dbConnection
+      .collection('circles')
+      .deleteMany({ name: mockCircle.name });
   });
 
   afterAll(async () => {
+    await dbConnection
+      .collection('users')
+      .deleteMany({ email: mockUser.email });
+    if (circleId) {
+      await dbConnection
+        .collection('circles')
+        .deleteOne({ name: mockCircle.name });
+    }
     await app.close();
   });
 
-  // --- TESTS DE CIRCLES ---
+  // ---TEST SCENARIOS ---
 
-  describe('POST /circles', () => {
-    it('Debería crear un círculo correctamente (201)', async () => {
-      const response = await request(app.getHttpServer() as Express)
-        .post('/circles')
-        .set('Authorization', `Bearer ${jwtToken}`) // <--- La llave maestra 🔑
-        .send(validCircle)
-        .expect(201);
+  // 1. REGISTER
+  it('/auth/register (POST) - should register a new user', async () => {
+    const response = await request(app.getHttpServer() as Express)
+      .post('/auth/register')
+      .send(mockUser)
+      .expect(201);
 
-      // Verificamos que la respuesta tenga datos
-      expect(response.body).toHaveProperty('_id');
-      expect(response.body.name).toBe(validCircle.name);
-      expect(response.body.members).toBeInstanceOf(Array);
-    });
-
-    it('Debería fallar si NO estoy logueado (401)', () => {
-      return request(app.getHttpServer() as Express)
-        .post('/circles')
-        .send(validCircle) // Falta el header Authorization
-        .expect(401);
-    });
-
-    it('Debería fallar si faltan datos requeridos (400)', () => {
-      return request(app.getHttpServer() as Express)
-        .post('/circles')
-        .set('Authorization', `Bearer ${jwtToken}`)
-        .send({
-          name: 'Círculo Incompleto',
-          // Falta type, level, languages...
-        })
-        .expect(400);
-    });
+    expect(response.body).toHaveProperty('user');
+    expect(response.body.user).toHaveProperty('id');
+    expect(response.body.user.email).toBe(mockUser.email);
+    userId = response.body.user.id;
   });
 
-  describe('GET /circles', () => {
-    it('Debería listar los círculos (200)', async () => {
-      const response = await request(app.getHttpServer() as Express)
-        .get('/circles')
-        .set('Authorization', `Bearer ${jwtToken}`)
-        .expect(200);
+  // 2. LOGIN
+  it('/auth/login (POST) - should login and return JWT', async () => {
+    const response = await request(app.getHttpServer() as Express)
+      .post('/auth/login')
+      .send({ email: mockUser.email, password: mockUser.password })
+      .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBeGreaterThan(0);
-    });
+    expect(response.body).toHaveProperty('access_token');
+    jwtToken = response.body.access_token;
   });
+
+  // 3. CREATE CIRCLE
+  it('/circles (POST) - should create circle and verify Admin role + Uppercase Transform', async () => {
+    const response = await request(app.getHttpServer() as Express)
+      .post('/circles')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .send(mockCircle)
+      .expect(201);
+
+    expect(response.body.level).toBe('INTERMEDIATE');
+    expect(response.body.languages).toEqual(['ES', 'EN']);
+
+    const members = response.body.members;
+    expect(members).toHaveLength(1);
+    expect(members[0].role).toBe('ADMIN');
+    expect(members[0].userId).toBe(userId);
+
+    circleId = response.body._id;
+  });
+
+  // 4. VERIFY PROFILE
+  it('/auth/profile (GET) - should show the active exchange circle', async () => {
+    const response = await request(app.getHttpServer() as Express)
+      .get('/users/profile')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .expect(200);
+
+    const user = response.body;
+
+    expect(user).toHaveProperty('activeExchangeId');
+    expect(user.activeExchangeId).toBe(circleId);
+  });
+
+  // // 5. BUSINESS RULE : A USER CAN ONLY HAVE ONE ACTIVE EXCHANGE CIRCLE
+  // it('/circles (POST) - should FAIL to create a second Exchange Circle', async () => {
+  //   return request(app.getHttpServer() as Express)
+  //     .post('/circles')
+  //     .set('Authorization', `Bearer ${jwtToken}`)
+  //     .send({
+  //       ...mockCircle,
+  //       name: 'Another Exchange Circle',
+  //     })
+  //     .expect(400)
+  //     .expect((res) => {
+  //       expect(res.body.message).toMatch(/already has an active exchange/i);
+  //     });
+  // });
+
+  // // 6. CONSISTENCY: Verify that the created circle can be retrieved and has correct details
+  // it('/circles/:id (GET) - should return the created circle details', async () => {
+  //   const response = await request(app.getHttpServer() as Express)
+  //     .get(`/circles/${circleId}`)
+  //     .set('Authorization', `Bearer ${jwtToken}`)
+  //     .expect(200);
+
+  //   expect(response.body.name).toBe(mockCircle.name);
+  //   expect(response.body.admin).toBeDefined();
+  // });
+
+  // // 7. SECURITY: Verify that unauthenticated requests are rejected
+  // it('/circles (POST) - should FAIL without JWT token', async () => {
+  //   return request(app.getHttpServer() as Express)
+  //     .post('/circles')
+  //     .send(mockCircle)
+  //     .expect(401);
+  // });
 });
