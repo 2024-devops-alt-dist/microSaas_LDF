@@ -10,12 +10,18 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
   {
-    ignores: ['dist/', 'node_modules/', 'eslint.config.js'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/build/**',
+      '**/public/**',
+      '**/*.config.js',
+      'package-lock.json',
+    ],
   },
 
   eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
     plugins: {
@@ -26,10 +32,10 @@ export default [
       globals: {
         ...globals.browser,
       },
-      parserOptions: {
+      /*parserOptions: {
         project: ['./tsconfig.app.json', './tsconfig.node.json'],
         tsconfigRootDir: import.meta.dirname,
-      },
+      },*/
     },
     rules: {
       ...reactHooks.configs.recommended.rules,

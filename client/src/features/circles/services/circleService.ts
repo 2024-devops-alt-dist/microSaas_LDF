@@ -1,17 +1,17 @@
 import type { Circle, CircleMember, ICircleService } from '../types';
 
 const CURRENT_USER_ID = '695bbcae94835a46dc227863';
-const API_URL = 'http://localhost:3000';
-
+const VITE_API_URL = import.meta.env.VITE_API_URL as string;
 export class CircleService implements ICircleService {
   private async request<T>(
     endpoint: string,
     options?: RequestInit,
   ): Promise<T> {
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    const response = await fetch(`${VITE_API_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       ...options,
     });
 
@@ -27,12 +27,8 @@ export class CircleService implements ICircleService {
     return text ? (JSON.parse(text) as T) : (null as T);
   }
 
-  async getMyCircles(): Promise<Circle[]> {
-    // when Auth is ready, replace with actual user ID
-    //return this.request<Circle[]>(`/circles/mycircles?userId=${userId}`);
-    return this.request<Circle[]>(
-      `/circles/mycircles?userId=${CURRENT_USER_ID}`,
-    );
+  async getMyCircles(userId: string): Promise<Circle[]> {
+    return this.request<Circle[]>(`/circles/mycircles?userId=${userId}`);
   }
 
   async getAvailableCircles(): Promise<Circle[]> {
