@@ -58,7 +58,7 @@ jobs:
         run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
       
       - name: Run linter
-        run: npx eslint "src/**/*.{ts,tsx}" --quiet --no-error-on-unmatched-pattern
+        run: npm run lint
         env:
           CI: true        
       - name: Build application
