@@ -32,10 +32,10 @@ export default [
       globals: {
         ...globals.browser,
       },
-      parserOptions: {
+      /*parserOptions: {
         project: ['./tsconfig.app.json', './tsconfig.node.json'],
         tsconfigRootDir: import.meta.dirname,
-      },
+      },*/
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
