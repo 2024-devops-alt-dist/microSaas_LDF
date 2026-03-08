@@ -11,12 +11,12 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 export default [
   {
     ignores: [
-      'dist/',
-      'node_modules/',
-      'build/',
-      'public/',
-      '*.config.js',
-      'eslint.config.js',
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/build/**',
+      '**/public/**',
+      '**/*.config.js',
+      'package-lock.json',
     ],
   },
 
