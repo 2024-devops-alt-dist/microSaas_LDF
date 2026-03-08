@@ -9,12 +9,14 @@ const circleService = new CircleService();
 const MyCirclesView: React.FC = () => {
   const [circles, setCircles] = useState<Circle[]>([]);
   const [loading, setLoading] = useState(true);
+  // TODO: Replace with actual userId from auth context or hook
+  const userId = '';
 
   useEffect(() => {
-    const fetchCircles = async () => {
+    const fetchCircles = async (userId: string) => {
       try {
         setLoading(true);
-        const data = await circleService.getMyCircles();
+        const data = await circleService.getMyCircles(userId);
         setCircles(data);
       } catch (error) {
         console.error('Error fetching circles', error);
@@ -22,8 +24,8 @@ const MyCirclesView: React.FC = () => {
         setLoading(false);
       }
     };
-    void fetchCircles();
-  }, []);
+    void fetchCircles(userId);
+  }, [userId]);
 
   return (
     <MainLayout>

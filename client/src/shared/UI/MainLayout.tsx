@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react'; // 1. Importa useState
 import { Header } from './Header';
 import { BottomNavbar } from './BottomNavbar';
 
@@ -7,6 +7,8 @@ interface MainLayoutProps {
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const [activeTab, setActiveTab] = useState('home');
+
   return (
     <div className="h-[100dvh] w-full relative flex flex-col font-sans overflow-hidden bg-base-100">
       {/* 1. BACKGROUND GLOBAL */}
@@ -19,7 +21,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-base-100 to-transparent"></div>
       </div>
 
-      {/* 2. HEADER (Fixed above thanks to flex-col) */}
+      {/* 2. HEADER */}
       <div className="relative z-10 shrink-0 w-full max-w-md mx-auto px-5 pt-8">
         <Header />
       </div>
@@ -29,9 +31,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* 4. NAVBAR (Fixed at the bottom) */}
       <div className="relative z-50 shrink-0 w-full max-w-md mx-auto">
-        <BottomNavbar />
+        <BottomNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
     </div>
   );
