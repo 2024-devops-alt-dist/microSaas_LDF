@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { CircleService } from '../services/circleService';
+import { CircleService } from '../services/circles.service';
 import type { Circle } from '../types';
 
 export const useCircles = () => {

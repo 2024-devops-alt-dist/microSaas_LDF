@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { UserService } from '../services/userService';
+import { UserService } from '../services/users.service';
 import type { UserProfile } from '../types/index';
 
 export const useExchangePartners = () => {
