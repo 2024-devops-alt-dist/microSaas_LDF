@@ -33,11 +33,12 @@ export interface ExchangeCircle extends BaseCircle {
 export type Circle = PracticeCircle | ExchangeCircle;
 
 export interface ICircleService {
-  getMyCircles(userId: string): Promise<Circle[]>;
+  getMyCircles(): Promise<Circle[]>;
   getAvailableCircles(): Promise<Circle[]>;
   requestToJoinCircle(circleId: string): Promise<Circle>;
   leaveCircle(circleId: string): Promise<{ success: boolean }>;
   getCirclesByType(type: string): Promise<Circle[]>;
   getCircleById(id: string): Promise<Circle>;
   approveRequest(circleId: string, userId: string): Promise<Circle>;
+  createCircle(circleData: Partial<Circle>): Promise<Circle>;
 }
