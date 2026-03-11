@@ -5,14 +5,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateJoinRequestDto {
   @ApiProperty({
-    example: '60d0fe4f5311236168a109ca',
-    description: 'Unique identifier of the user requesting to join',
-  })
-  @IsNotEmpty()
-  @IsMongoId()
-  userId: string;
-
-  @ApiProperty({
     example: '60d21b4667d0d8992e610c85',
     description: 'Unique identifier of the circle to join',
   })

@@ -10,4 +10,13 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://host.docker.internal:3000',
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+    host: true,
+  },
 });

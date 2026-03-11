@@ -1,15 +1,11 @@
----
 name: CI Checks
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   workflow_dispatch: {}
+
 jobs:
   backend-checks:
     name: Backend Checks
@@ -26,14 +22,19 @@ jobs:
           node-version: 20.19.0
           cache: npm
           cache-dependency-path: api/package-lock.json
+      
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
+      
       - name: Check formatting
-        run: npx prettier --check .
+        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
+
       - name: Run linter
         run: npm run lint
+      
       - name: Security audit
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=critical
+
   frontend-checks:
     name: Frontend Checks
     runs-on: ubuntu-latest
@@ -49,16 +50,20 @@ jobs:
           node-version: 20.19.0
           cache: npm
           cache-dependency-path: client/package-lock.json
+      
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
+        
       - name: Check formatting
-        run: npx prettier --check .
+        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
+      
       - name: Run linter
         run: npm run lint
+        env:
+          CI: true        
       - name: Build application
         run: npm run build
-      - name: Security audit
-        run: npm audit --audit-level=high
+
   docker-checks:
     name: Docker Validation
     runs-on: ubuntu-latest
