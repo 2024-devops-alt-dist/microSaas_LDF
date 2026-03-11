@@ -24,7 +24,7 @@ interface ExpressRequestWithUser {
   };
 }
 @ApiTags('Requests')
-@ApiBearerAuth('access-token') // Candadito para todo el controlador
+@ApiBearerAuth('access-token')
 @UseGuards(AuthGuard('jwt'))
 @Controller('requests')
 export class RequestsController {

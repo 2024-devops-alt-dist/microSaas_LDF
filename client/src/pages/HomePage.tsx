@@ -4,8 +4,10 @@ import { Header } from '../shared/UI/Header';
 import { BottomNavbar } from '../shared/UI/BottomNavbar';
 import { useCircles } from '../features/circles/hooks/useCircles';
 import { useExchangePartners } from '../features/users/hooks/useExchangePartners';
+import { CircleModal } from '../features/circles/UI/CircleModal';
 import circleImg from '../assets/circle_illustration.png';
 import logoImg from '../assets/logo.png';
+import { PartnerModal } from '@/features/users/UI/PartnerModal';
 
 export const HomePage = () => {
   const { user } = useAuth();
@@ -74,7 +76,11 @@ export const HomePage = () => {
                       <p className="text-[10px] text-gray-500 mt-0.5">
                         Learns:{' '}
                         <span className="text-orange-500 font-bold">
-                          {partner.learningLanguage}
+                          {partner.targetLanguages
+                            ?.map((tl) =>
+                              typeof tl === 'object' ? tl.language : tl,
+                            )
+                            .join(', ') || 'Any'}
                         </span>
                       </p>
                     </div>
@@ -113,119 +119,22 @@ export const HomePage = () => {
 
       {/* PARTNER MODAL */}
       {isPartnerModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-cyan-950/20 backdrop-blur-sm p-4">
-          <div className="bg-white w-full max-w-lg rounded-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-cyan-900">All Partners</h2>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsPartnerModalOpen(false);
-                }}
-                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold hover:bg-gray-200 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar h-[440px]">
-              {partners.map((p) => (
-                <div
-                  key={p._id}
-                  className="flex items-center justify-between p-4 bg-cyan-50/50 rounded-[2.5rem] border border-cyan-100/50 hover:bg-cyan-50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    {/* CONTENEDOR DE AVATAR CON ESCALA */}
-                    <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-white border border-cyan-100 flex items-center justify-center p-2 shadow-sm">
-                      <img
-                        src={p.avatarUrl || logoImg}
-                        // Si no hay avatar real, usamos object-contain para el logo
-                        className={`w-full h-full ${p.avatarUrl ? 'object-cover' : 'object-contain'}`}
-                        alt={p.name}
-                      />
-                    </div>
-
-                    <div className="text-left">
-                      <p className="font-bold text-lg text-cyan-950 leading-tight">
-                        {p.name}
-                      </p>
-                      <p className="text-[10px] text-cyan-600 font-black uppercase tracking-widest mt-0.5">
-                        Learns:{' '}
-                        <span className="text-orange-500">
-                          {p.learningLanguage}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <button className="text-[11px] font-black uppercase text-white bg-cyan-600 px-6 py-2.5 rounded-full shadow-lg shadow-cyan-600/20 active:scale-95 transition-transform">
-                    Chat
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <PartnerModal
+          key={isPartnerModalOpen ? 'p-open' : 'p-closed'}
+          isOpen={isPartnerModalOpen}
+          onClose={() => setIsPartnerModalOpen(false)}
+        />
       )}
 
       {/* CIRCLE MODAL */}
       {isCircleModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-cyan-950/20 backdrop-blur-sm p-4">
-          <div className="bg-white w-full max-w-lg rounded-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-cyan-900">
-                Available Circles
-              </h2>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCircleModalOpen(false);
-                }}
-                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar h-[440px]">
-              {loadingCircles ? (
-                <p className="text-center py-10 opacity-50 italic">
-                  Fetching circles...
-                </p>
-              ) : (
-                circles.map((circle) => (
-                  <div
-                    key={circle._id}
-                    className="flex items-center justify-between p-4 bg-cyan-50/50 rounded-[2rem] border border-cyan-100/50"
-                  >
-                    <div className="flex items-center gap-4 overflow-hidden text-left">
-                      <div className="w-12 h-12 rounded-full bg-cyan-600 flex items-center justify-center text-white text-[10px] font-black uppercase flex-shrink-0">
-                        {circle.type === 'practice' ? (
-                          <span>{circle.language?.substring(0, 2)}</span>
-                        ) : (
-                          <span>
-                            {circle.languages?.[0]?.substring(0, 2)}/
-                            {circle.languages?.[1]?.substring(0, 2)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-base text-cyan-950 truncate">
-                          {circle.name}
-                        </span>
-                        <span className="text-[11px] text-cyan-600 font-medium uppercase tracking-wider">
-                          {circle.level} • {circle.type}
-                        </span>
-                      </div>
-                    </div>
-                    <button className="text-[11px] font-black uppercase text-white bg-cyan-600 px-5 py-2 rounded-full hover:bg-cyan-700 transition-colors">
-                      Join
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+        <CircleModal
+          key={isCircleModalOpen ? 'open' : 'closed'}
+          isOpen={isCircleModalOpen}
+          onClose={() => setIsCircleModalOpen(false)}
+          circles={circles}
+          loading={loadingCircles}
+        />
       )}
 
       <BottomNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
