@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMyCircles } from '../features/circles/hooks/useMyCircles';
+import { BottomNavbar } from '../shared/UI/BottomNavbar';
 import logoImg from '/src/assets/logo.png';
 
 export const MyCirclesPage = () => {
   const navigate = useNavigate();
   const { circles, loading } = useMyCircles();
+  const [activeTab, setActiveTab] = useState('circles');
 
   return (
-    <div className="min-h-screen bg-[#F0F7F8] p-6 pb-24">
+    <div className="min-h-screen bg-[#F0F7F8] p-6 pb-32">
+      {' '}
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <button
@@ -18,7 +22,6 @@ export const MyCirclesPage = () => {
         </button>
         <h1 className="text-2xl font-black text-cyan-900">My Circles</h1>
       </div>
-
       {/* List Container */}
       <div className="space-y-4">
         {loading ? (
@@ -34,7 +37,7 @@ export const MyCirclesPage = () => {
               You haven't joined any circles yet.
             </p>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
               className="text-cyan-600 font-black uppercase text-xs tracking-widest underline"
             >
               Discover Circles
@@ -48,7 +51,6 @@ export const MyCirclesPage = () => {
               className="bg-white/90 backdrop-blur-md rounded-[2rem] p-5 shadow-lg shadow-cyan-900/5 border border-white flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
             >
               <div className="flex items-center gap-4">
-                {/* Logo del Círculo en lugar de Emojis */}
                 <div className="w-14 h-14 rounded-2xl bg-white border border-cyan-50 flex items-center justify-center p-2 shadow-inner">
                   <img
                     src={logoImg}
@@ -56,7 +58,6 @@ export const MyCirclesPage = () => {
                     className="w-full h-full object-contain"
                   />
                 </div>
-
                 <div className="text-left">
                   <h3 className="font-bold text-cyan-950 text-lg leading-tight">
                     {circle.name}
@@ -73,7 +74,6 @@ export const MyCirclesPage = () => {
                   </div>
                 </div>
               </div>
-
               <div className="text-cyan-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -94,6 +94,8 @@ export const MyCirclesPage = () => {
           ))
         )}
       </div>
+      {/* Footer */}
+      <BottomNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 };

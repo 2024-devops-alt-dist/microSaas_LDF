@@ -11,7 +11,7 @@ export const BottomNavbar = ({
   const navigate = useNavigate();
 
   const menu = [
-    { id: 'home', icon: Home, label: 'Home', path: '/' },
+    { id: 'home', icon: Home, label: 'Home', path: '/home' },
     { id: 'circles', icon: Globe, label: 'My circle(s)', path: '/circles' },
     {
       id: 'messages',
