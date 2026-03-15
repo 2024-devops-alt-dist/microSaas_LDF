@@ -24,7 +24,7 @@ export const HomePage = () => {
       <div className="relative z-20 p-6 pb-2">
         <Header
           name={user?.name}
-          avatar={user?.avatar || logoImg}
+          avatar={user?.avatarURL || logoImg}
           timezone={user?.timezone?.split('/').pop()?.replace('_', ' ')}
         />
       </div>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   WebSocketGateway,
@@ -33,21 +34,27 @@ export class MessagesGateway
 
   handleConnection(client: Socket) {
     try {
-      const token = (client.handshake.auth?.token ||
-        client.handshake.headers.authorization) as string;
+      const rawCookies = client.handshake.headers.cookie;
 
-      if (!token) {
-        throw new Error('Token not provided');
+      if (!rawCookies) {
+        throw new Error('No cookies found in handshake headers');
       }
-      const cleanToken = token.replace('Bearer ', '');
+      const parsedCookies = rawCookies.split(';').reduce((acc, curr) => {
+        const [key, value] = curr.split('=');
+        acc[key.trim()] = value;
+        return acc;
+      }, {});
 
-      const payload: { sub: string; name: string } =
-        this.jwtService.verify(cleanToken);
-      client.data.user = payload as JwtPayload;
+      const token = parsedCookies['access_token'];
 
-      console.log(
-        `Client authenticated: ${payload.sub} (Socket: ${client.id})`,
-      );
+      if (!token || typeof token !== 'string') {
+        throw new Error('Token access_token not found in cookies');
+      }
+
+      const payload = this.jwtService.verify(token);
+      client.data.user = payload;
+
+      console.log(`Client connected: ${payload.sub}`);
     } catch (error) {
       console.log(`Connection rejected: ${error.message}`);
       client.disconnect();
@@ -80,7 +87,7 @@ export class MessagesGateway
     const user = client.data.user as JwtPayload;
     const userId = user?.sub;
     if (!userId) {
-      throw new WsException('Usuario no autenticado');
+      throw new WsException('User not authenticated');
     }
     const message = await this.messagesService.create(createMessageDto, userId);
     this.server.to(createMessageDto.circleId).emit('newMessage', message);
