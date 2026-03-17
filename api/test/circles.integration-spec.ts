@@ -6,12 +6,12 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { Express } from 'express';
 
-describe('AppController (e2e)', () => {
+describe('AppController (integration)', () => {
   let app: INestApplication;
   let dbConnection: Connection;
   let jwtToken: string;
@@ -39,10 +39,6 @@ describe('AppController (e2e)', () => {
   };
 
   beforeAll(async () => {
-    console.log('---------------------------------------------------');
-    console.log('DEBUG: Intentando conectar a DB...');
-    console.log('DEBUG: MONGO_URI es:', process.env.DATABASE_URL);
-    console.log('---------------------------------------------------');
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
