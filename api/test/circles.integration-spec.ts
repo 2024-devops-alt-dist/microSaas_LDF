@@ -6,12 +6,13 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { Express } from 'express';
+import cookieParser from 'cookie-parser';
 
-describe('AppController (e2e)', () => {
+describe('AppController (integration)', () => {
   let app: INestApplication;
   let dbConnection: Connection;
   let jwtToken: string;
@@ -39,15 +40,14 @@ describe('AppController (e2e)', () => {
   };
 
   beforeAll(async () => {
-    console.log('---------------------------------------------------');
-    console.log('DEBUG: Intentando conectar a DB...');
-    console.log('DEBUG: MONGO_URI es:', process.env.DATABASE_URL);
-    console.log('---------------------------------------------------');
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    app.use(cookieParser());
 
     app.useGlobalPipes(
       new ValidationPipe({
@@ -96,21 +96,34 @@ describe('AppController (e2e)', () => {
   });
 
   // 2. LOGIN
-  it('/auth/login (POST) - should login and return JWT', async () => {
+  it('/auth/login (POST) - should login and return JWT in a cookie', async () => {
     const response = await request(app.getHttpServer() as Express)
       .post('/auth/login')
       .send({ email: mockUser.email, password: mockUser.password })
       .expect(200);
 
-    expect(response.body).toHaveProperty('access_token');
-    jwtToken = response.body.access_token;
+    const cookies: string[] = response.get('Set-Cookie') || [];
+
+    const authCookie = cookies.find((cookie) =>
+      cookie.includes('access_token='),
+    );
+
+    if (!authCookie) {
+      throw new Error('access_token cookie not found in response headers');
+    }
+    const tokenValue = authCookie.split(';')[0].split('=')[1];
+
+    jwtToken = tokenValue;
+
+    expect(jwtToken).toBeDefined();
+    expect(jwtToken.length).toBeGreaterThan(10);
   });
 
   // 3. CREATE CIRCLE
   it('/circles (POST) - should create circle and verify Admin role + Uppercase Transform', async () => {
     const response = await request(app.getHttpServer() as Express)
       .post('/circles')
-      .set('Authorization', `Bearer ${jwtToken}`)
+      .set('Cookie', [`access_token=${jwtToken}`])
       .send(mockCircle)
       .expect(201);
 
@@ -129,7 +142,7 @@ describe('AppController (e2e)', () => {
   it('/auth/profile (GET) - should show the active exchange circle', async () => {
     const response = await request(app.getHttpServer() as Express)
       .get('/users/profile')
-      .set('Authorization', `Bearer ${jwtToken}`)
+      .set('Cookie', [`access_token=${jwtToken}`])
       .expect(200);
 
     const user = response.body;

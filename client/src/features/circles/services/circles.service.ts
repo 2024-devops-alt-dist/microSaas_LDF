@@ -1,88 +1,54 @@
 import type { Circle, CircleMember, ICircleService } from '../types';
+import { client } from '@/shared/api/client';
 
-const CURRENT_USER_ID = '695bbcae94835a46dc227863';
-const VITE_API_URL = import.meta.env.VITE_API_URL as string;
 export class CircleService implements ICircleService {
-  private async request<T>(
-    endpoint: string,
-    options?: RequestInit,
-  ): Promise<T> {
-    const response = await fetch(`${VITE_API_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      ...options,
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Error HTTP: ${response.status} - ${response.statusText}`,
-      );
-    }
-
-    if (response.status === 204) return null as T;
-
-    const text = await response.text();
-    return text ? (JSON.parse(text) as T) : (null as T);
-  }
-
-  async getMyCircles(userId: string): Promise<Circle[]> {
-    return this.request<Circle[]>(`/circles/mycircles?userId=${userId}`);
-  }
-
-  async getAvailableCircles(): Promise<Circle[]> {
-    return this.request<Circle[]>('/circles');
-  }
-
-  async getCircleById(id: string): Promise<Circle> {
-    return this.request<Circle>(`/circles/${id}`);
-  }
-
-  async getCirclesByType(type: string): Promise<Circle[]> {
-    return this.request<Circle[]>(`/circles/type/${type}`);
-  }
-
-  async createCircle(circleData: Partial<Circle>): Promise<Circle> {
-    return this.request<Circle>('/circles', {
-      method: 'POST',
-      body: JSON.stringify(circleData),
-    });
-  }
-
   // USER ACTION METHODS
 
   async requestToJoinCircle(
     circleId: string,
     memberData?: Partial<CircleMember>,
   ): Promise<Circle> {
-    const memberPayload = memberData || {
-      userId: CURRENT_USER_ID,
-      role: 'member',
-    };
-
-    return this.request(`/circles/${circleId}/join`, {
-      method: 'POST',
-      body: JSON.stringify({
-        member: memberPayload,
-      }),
+    const { data } = await client.post<Circle>(`/circles/${circleId}/join`, {
+      member: memberData,
     });
+    return data;
   }
 
-  async leaveCircle(
-    circleId: string,
-    userId: string = CURRENT_USER_ID,
-  ): Promise<{ success: boolean }> {
-    return this.request(`/circles/${circleId}/leave`, {
-      method: 'POST',
-      body: JSON.stringify({ userId: userId }),
-    });
+  async leaveCircle(circleId: string): Promise<{ success: boolean }> {
+    const { data } = await client.post(`/circles/${circleId}/leave`);
+    return data;
   }
 
   async approveRequest(circleId: string, userId: string): Promise<Circle> {
-    return this.request(`/circles/${circleId}/approve`, {
-      method: 'POST',
-      body: JSON.stringify({ userId }),
+    const { data } = await client.post<Circle>(`/circles/${circleId}/approve`, {
+      userId,
     });
+    return data;
+  }
+
+  // ******
+  async getAvailableCircles(): Promise<Circle[]> {
+    const { data } = await client.get<Circle[]>('/circles');
+    return data;
+  }
+
+  async getMyCircles(): Promise<Circle[]> {
+    const { data } = await client.get<Circle[]>('/circles/mycircles');
+    return data;
+  }
+
+  async getCircleById(id: string): Promise<Circle> {
+    const { data } = await client.get<Circle>(`/circles/${id}`);
+    return data;
+  }
+
+  async getCirclesByType(type: string): Promise<Circle[]> {
+    const { data } = await client.get<Circle[]>(`/circles/type/${type}`);
+    return data;
+  }
+
+  async createCircle(circleData: Partial<Circle>): Promise<Circle> {
+    const { data } = await client.post<Circle>('/circles', circleData);
+    return data;
   }
 }

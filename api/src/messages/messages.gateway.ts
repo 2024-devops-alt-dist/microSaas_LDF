@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   WebSocketGateway,
@@ -13,6 +14,7 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { JwtService } from '@nestjs/jwt';
+import * as cookie from 'cookie';
 
 interface JwtPayload {
   sub: string;
@@ -33,21 +35,23 @@ export class MessagesGateway
 
   handleConnection(client: Socket) {
     try {
-      const token = (client.handshake.auth?.token ||
-        client.handshake.headers.authorization) as string;
+      const rawCookies = client.handshake.headers.cookie;
 
-      if (!token) {
-        throw new Error('Token not provided');
+      if (!rawCookies || typeof rawCookies !== 'string') {
+        throw new Error('No cookies found in handshake headers');
       }
-      const cleanToken = token.replace('Bearer ', '');
+      const parsedCookies: Record<string, string | undefined> =
+        cookie.parse(rawCookies);
+      const token = parsedCookies['access_token'];
 
-      const payload: { sub: string; name: string } =
-        this.jwtService.verify(cleanToken);
-      client.data.user = payload as JwtPayload;
+      if (!token || typeof token !== 'string') {
+        throw new Error('Token access_token not found in cookies');
+      }
 
-      console.log(
-        `Client authenticated: ${payload.sub} (Socket: ${client.id})`,
-      );
+      const payload = this.jwtService.verify(token);
+      client.data.user = payload;
+
+      console.log(`Client connected: ${payload.sub}`);
     } catch (error) {
       console.log(`Connection rejected: ${error.message}`);
       client.disconnect();
@@ -80,7 +84,7 @@ export class MessagesGateway
     const user = client.data.user as JwtPayload;
     const userId = user?.sub;
     if (!userId) {
-      throw new WsException('Usuario no autenticado');
+      throw new WsException('User not authenticated');
     }
     const message = await this.messagesService.create(createMessageDto, userId);
     this.server.to(createMessageDto.circleId).emit('newMessage', message);
