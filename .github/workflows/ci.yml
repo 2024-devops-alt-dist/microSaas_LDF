@@ -105,7 +105,10 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Start Infrastructure (Docker Compose)
-        run: docker compose up -d --build
+        run: |
+          touch ./api/.env
+          touch ./client/.env
+          docker compose up -d --build
         env:
           MONGO_USER: root
           MONGO_PASS: root_password
