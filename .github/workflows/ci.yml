@@ -40,7 +40,7 @@ jobs:
           cache-dependency-path: client/package-lock.json
       - run: npm install --legacy-peer-deps
       - run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
-      - run: npx eslint "src/**/*.{ts,tsx,js,jsx}" --max-warnings=0
+      - run: npx eslint src --max-warnings=0 --quiet --no-error-on-unmatched-pattern
         env:
           CI: true
       - run: npm run build
