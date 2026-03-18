@@ -119,7 +119,7 @@ describe('AppController (integration)', () => {
   it('/circles (POST) - should create circle and verify Admin role + Uppercase Transform', async () => {
     const response = await request(app.getHttpServer() as Express)
       .post('/circles')
-      .set('Authorization', `Bearer ${jwtToken}`)
+      .set('Cookie', [`access_token=${jwtToken}`])
       .send(mockCircle)
       .expect(201);
 
@@ -138,7 +138,7 @@ describe('AppController (integration)', () => {
   it('/auth/profile (GET) - should show the active exchange circle', async () => {
     const response = await request(app.getHttpServer() as Express)
       .get('/users/profile')
-      .set('Authorization', `Bearer ${jwtToken}`)
+      .set('Cookie', [`access_token=${jwtToken}`])
       .expect(200);
 
     const user = response.body;
