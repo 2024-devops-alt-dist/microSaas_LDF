@@ -14,6 +14,7 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { JwtService } from '@nestjs/jwt';
+import * as cookie from 'cookie';
 
 interface JwtPayload {
   sub: string;
@@ -36,15 +37,11 @@ export class MessagesGateway
     try {
       const rawCookies = client.handshake.headers.cookie;
 
-      if (!rawCookies) {
+      if (!rawCookies || typeof rawCookies !== 'string') {
         throw new Error('No cookies found in handshake headers');
       }
-      const parsedCookies = rawCookies.split(';').reduce((acc, curr) => {
-        const [key, value] = curr.split('=');
-        acc[key.trim()] = value;
-        return acc;
-      }, {});
-
+      const parsedCookies: Record<string, string | undefined> =
+        cookie.parse(rawCookies);
       const token = parsedCookies['access_token'];
 
       if (!token || typeof token !== 'string') {
