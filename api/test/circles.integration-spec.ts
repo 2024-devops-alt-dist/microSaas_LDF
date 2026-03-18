@@ -92,14 +92,27 @@ describe('AppController (integration)', () => {
   });
 
   // 2. LOGIN
-  it('/auth/login (POST) - should login and return JWT', async () => {
+  it('/auth/login (POST) - should login and return JWT in a cookie', async () => {
     const response = await request(app.getHttpServer() as Express)
       .post('/auth/login')
       .send({ email: mockUser.email, password: mockUser.password })
       .expect(200);
 
-    expect(response.body).toHaveProperty('access_token');
-    jwtToken = response.body.access_token;
+    const cookies: string[] = response.get('Set-Cookie') || [];
+
+    const authCookie = cookies.find((cookie) =>
+      cookie.includes('access_token='),
+    );
+
+    if (!authCookie) {
+      throw new Error('access_token cookie not found in response headers');
+    }
+    const tokenValue = authCookie.split(';')[0].split('=')[1];
+
+    jwtToken = tokenValue;
+
+    expect(jwtToken).toBeDefined();
+    expect(jwtToken.length).toBeGreaterThan(10);
   });
 
   // 3. CREATE CIRCLE
