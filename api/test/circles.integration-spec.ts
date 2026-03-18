@@ -10,6 +10,7 @@ import { AppModule } from '../src/app.module';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { Express } from 'express';
+import cookieParser from 'cookie-parser';
 
 describe('AppController (integration)', () => {
   let app: INestApplication;
@@ -44,6 +45,9 @@ describe('AppController (integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    app.use(cookieParser());
 
     app.useGlobalPipes(
       new ValidationPipe({
